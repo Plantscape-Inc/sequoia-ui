@@ -6,7 +6,7 @@ import { Button, FileInput, Label } from "flowbite-react";
 
 export default function InvoiceAuto() {
 
-    const API_URL = "http://localhost:5555"
+    const API_URL = import.meta.env.VITE_EPICOR_INVOICE_AUTO_API_URL
 
     const [file, setFile] = useState<File | null>(null);
 
@@ -33,10 +33,7 @@ export default function InvoiceAuto() {
                 method: "POST",
                 body: formData,
             });
-            // const response = await fetch(`${API_URL}/test`, {
-            //     method: "POST"
-            // });
-
+            
             console.log(response)
 
             if (!response.ok) {

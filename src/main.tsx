@@ -1,55 +1,57 @@
 import { initThemeMode } from "flowbite-react";
-import { StrictMode, useEffect, useState } from "react";
+import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { ThemeInit } from "../.flowbite-react/init";
-import Home from "./pages/Home.tsx";
-import Account from './pages/Account.tsx';
-import Orders from './pages/Orders/Orders.tsx';
+
 import "./index.css";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Nav from "./components/Nav.tsx";
 import type { GoogleUserInfo } from "./types/auth.type.ts";
 import InvoiceAuto from "./pages/InvoiceAuto.tsx";
+import Home from "./pages/Home.tsx";
+import Account from './pages/Account.tsx';
+import Orders from './pages/Orders/Orders.tsx';
+import ProductAnalysis from "./pages/ProductAnalysis/ProductAnalysis.tsx";
 
 function Root() {
     const [user, setUser] = useState<GoogleUserInfo | null>(null);
 
-    useEffect(() => {
+    // useEffect(() => {
+    //     return;
+    //     const urlParams = new URLSearchParams(window.location.search);
+    //     const token = urlParams.get("token");
+    //     console.log("Token", token)
+    //     if (token) {
+    //         localStorage.setItem("auth_token", token);
+    //         window.history.replaceState({}, document.title, "/account");
+    //     }
+    //     const storedToken = localStorage.getItem("auth_token");
+    //     if (storedToken) {
+    //         fetch(`${import.meta.env.VITE_AUTH_API_URL}/validate`, {
+    //             method: "POST",
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //             },
+    //             body: JSON.stringify({ token: storedToken }),
+    //         })
+    //             .then((res) => (res.ok ? res.json() : null))
+    //             .then((data) => {
+    //                 if (data?.valid) {
+    //                     setUser({
+    //                         email: data.payload.sub,
+    //                         name: data.payload.name,
+    //                     });
+    //                 } else {
+    //                     setUser(null);
+    //                     localStorage.removeItem("auth_token");
+    //                 }
+    //             })
+    //             .catch((err) => console.error("Failed to validate token:", err));
+    //     } else {
+    //         window.location.href = `${import.meta.env.VITE_AUTH_API_URL}/login`;
 
-        // const urlParams = new URLSearchParams(window.location.search);
-        // const token = urlParams.get("token");
-        // console.log("Token", token)
-        // if (token) {
-        //     localStorage.setItem("auth_token", token);
-        //     window.history.replaceState({}, document.title, "/account");
-        // }
-        // const storedToken = localStorage.getItem("auth_token");
-        // if (storedToken) {
-        //     fetch(`${import.meta.env.VITE_AUTH_API_URL}/validate`, {
-        //         method: "POST",
-        //         headers: {
-        //             "Content-Type": "application/json",
-        //         },
-        //         body: JSON.stringify({ token: storedToken }),
-        //     })
-        //         .then((res) => (res.ok ? res.json() : null))
-        //         .then((data) => {
-        //             if (data?.valid) {
-        //                 setUser({
-        //                     email: data.payload.sub,
-        //                     name: data.payload.name,
-        //                 });
-        //             } else {
-        //                 setUser(null);
-        //                 localStorage.removeItem("auth_token");
-        //             }
-        //         })
-        //         .catch((err) => console.error("Failed to validate token:", err));
-        // } else {
-        //     window.location.href = `${import.meta.env.VITE_AUTH_API_URL}/login`;
-
-        // }
-    }, [setUser]);
+    //     }
+    // }, [setUser]);
 
     console.log(import.meta.env.VITE_AUTH_API_URL)
 
@@ -80,6 +82,7 @@ function Root() {
                         <Route path="/account" element={<Account user={user} setUser={setUser} />} />
                         <Route path="/orders" element={<Orders />} />
                         <Route path="/invoiceauto" element={<InvoiceAuto />} />
+                        <Route path="/productAnalysis" element={<ProductAnalysis />} />
                     </Routes>
                 </BrowserRouter>
             </main>

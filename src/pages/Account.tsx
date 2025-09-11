@@ -10,8 +10,7 @@ interface AccountProps {
 export default function Account({ user, setUser }: AccountProps) {
 
     function login() {
-        // window.location.href = `${import.meta.env.VITE_AUTH_API_URL}/login`;
-        window.location.href = `/asdfasdf`;
+        window.location.href = `${import.meta.env.VITE_AUTH_API_URL}/login`;
     }
 
     function logout() {
