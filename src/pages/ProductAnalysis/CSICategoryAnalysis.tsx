@@ -1,26 +1,21 @@
 import { useState } from "react";
-import { Accordion, AccordionContent, AccordionPanel, AccordionTitle, Button, Label, Spinner } from "flowbite-react";
+import { Accordion, AccordionContent, AccordionPanel, AccordionTitle, Button, Spinner } from "flowbite-react";
 import { type CSICategoryAnalysisOverview } from "../../types/productAnalysis.type";
 
 import Plot from 'react-plotly.js';
 
-export default function ProductAnalysis() {
+interface ProductAnalysisProps {
+    startDate: string;
+    endDate: string;
+}
+
+export default function CSICategoryAnalysis({ startDate, endDate }: ProductAnalysisProps) {
     const API_URL = import.meta.env.VITE_PRODUCT_ANALYSIS_API_URL;
 
     const [loading, setLoading] = useState<boolean>(false);
 
-    const [startDate, setStartDate] = useState<string>("2025-01-01");
-    const [endDate, setEndDate] = useState<string>("2025-07-30");
-
     const [overviewData, setOverview] =
         useState<CSICategoryAnalysisOverview | null>(null);
-
-
-    // const formatLargeNumber = (num: number) => {
-    //     if (num >= 1_000_000) return (num / 1_000_000).toFixed(3) + 'M';
-    //     if (num >= 1_000) return (num / 1_000).toFixed(1) + 'K';
-    //     return num.toString();
-    // };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -54,39 +49,11 @@ export default function ProductAnalysis() {
     return (
         <div>
             <div>
-                <h1 className="relative text-center text-4xl leading-[125%] font-bold text-gray-900 dark:text-gray-200">
-                    CSI Product Category Analysis
-                </h1>
-
                 <form
-                    className="flex flex-wrap items-end justify-center gap-4 mt-6 mx-auto max-w-4xl"
+                    className="flex flex-wrap items-end gap-4 mt-6 mx-auto max-w-4xl"
                     onSubmit={handleSubmit}
                 >
-                    <div className="flex flex-col">
-                        <Label htmlFor="startDate">Start Date</Label>
-                        <input
-                            type="date"
-                            id="startDate"
-                            className="rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                        />
-                    </div>
-
-
-                    <div className="flex flex-col">
-                        <Label htmlFor="endDate">End Date</Label>
-                        <input
-                            type="date"
-                            id="endDate"
-                            className="rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                        />
-                    </div>
-
-
-                    <Button type="submit">Submit</Button>
+                    <Button type="submit">Reload</Button>
                 </form>
             </div>
 
