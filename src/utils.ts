@@ -1,5 +1,3 @@
-
-
 // export function enforceType<T>(obj: unknown): T {
 //   const result = {} as T;
 //   for (const key in obj) {
