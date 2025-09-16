@@ -12,7 +12,7 @@ export default function Home({ user }: HomeProps) {
                     Welcome {user?.name}
                 </h1>
                 <h3 className="relative text-center leading-[125%] font-bold text-gray-900 dark:text-gray-200">
-                    Your app is ready, start building with
+                    Click the upper left menu to access available pages
                 </h3>
 
             </div>

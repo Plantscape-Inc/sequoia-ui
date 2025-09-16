@@ -6,12 +6,12 @@ type NavItems = {
 };
 
 const sideNavOptions: NavItems = {
-    Home: "/",
-    Account: "/account",
-    ProductAnalysis: "/productAnalysis",
+    "Home": "/",
+    "Account": "/account",
+    "Product Analysis": "/productAnalysis",
     Epicor: {
-        Orders: "/orders",
-        InvoiceAuto: "/invoiceauto"
+        "Orders": "/orders",
+        "Invoice Automation": "/invoiceauto"
     },
 };
 
@@ -95,14 +95,13 @@ export default function Nav() {
                 </button>
                 <NavbarBrand href="/">
                     <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
-                        Epicor API
+                        Sequoia
                     </span>
                 </NavbarBrand>
-                {/* <NavbarToggle /> */}
                 <NavbarCollapse>
-                    <NavbarLink href="/">
+                    {/* <NavbarLink href="/">
                         Home
-                    </NavbarLink>
+                    </NavbarLink> */}
                     <NavbarLink href="/account">
                         Account
                     </NavbarLink>

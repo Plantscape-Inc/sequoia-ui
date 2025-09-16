@@ -11,7 +11,8 @@ import InvoiceAuto from "./pages/InvoiceAuto.tsx";
 import Home from "./pages/Home.tsx";
 import Account from './pages/Account.tsx';
 import Orders from './pages/Orders/Orders.tsx';
-import ProductAnalysis from "./pages/ProductAnalysis/ProductAnalysis.tsx";
+// import ProductAnalysis from "./pages/ProductAnalysis/ProductAnalysis.tsx";
+import ProductAnalysis from "./pages/ProductAnalysis/CSICategoryAnalysis.tsx";
 
 function Root() {
     const [user, setUser] = useState<GoogleUserInfo | null>(null);

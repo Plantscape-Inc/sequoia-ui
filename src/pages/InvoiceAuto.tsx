@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Button, FileInput, Label } from "flowbite-react";
+import { Button, FileInput, Label, Spinner } from "flowbite-react";
 
 
 
@@ -9,6 +9,8 @@ export default function InvoiceAuto() {
     const API_URL = import.meta.env.VITE_EPICOR_INVOICE_AUTO_API_URL
 
     const [file, setFile] = useState<File | null>(null);
+    const [loading, setLoading] = useState(false);
+
 
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -21,6 +23,8 @@ export default function InvoiceAuto() {
             return;
         }
 
+
+
         const formData = new FormData();
         formData.append("invoice", file);
 
@@ -29,11 +33,12 @@ export default function InvoiceAuto() {
         }
 
         try {
+            setLoading(true)
             const response = await fetch(`${API_URL}/parsepdf`, {
                 method: "POST",
                 body: formData,
             });
-            
+
             console.log(response)
 
             if (!response.ok) {
@@ -42,14 +47,11 @@ export default function InvoiceAuto() {
 
             console.log(response)
 
-            // Get the response as a blob (file)
             const blob = await response.blob();
 
-            // Create a temporary link to download the file
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
 
-            // Optionally, get filename from response headers
             const disposition = response.headers.get("Content-Disposition");
             let filename = "downloaded-file";
             if (disposition?.includes("filename=")) {
@@ -61,13 +63,15 @@ export default function InvoiceAuto() {
             document.body.appendChild(a);
             a.click();
 
-            // Cleanup
             a.remove();
             window.URL.revokeObjectURL(url);
 
             console.log("File download triggered successfully.");
         } catch (err) {
             console.error(err);
+
+        } finally {
+            setLoading(false)
         }
 
     };
@@ -93,6 +97,13 @@ export default function InvoiceAuto() {
                     </div>
                     <Button type="submit">Submit</Button>
                 </form>
+
+
+                {loading && (
+                    <div className="flex justify-center mt-6">
+                        <Spinner size="xl" />
+                    </div>
+                )}
 
             </div>
 
