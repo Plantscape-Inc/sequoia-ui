@@ -5,7 +5,7 @@ import { Label, Tabs, TabItem } from "flowbite-react";
 import CSICategoryAnalysis from "./CSICategoryAnalysis";
 
 export default function ProductAnalysis() {
-  const [startDate, setStartDate] = useState<string>("2025-07-01");
+  const [startDate, setStartDate] = useState<string>("2025-01-01");
   const [endDate, setEndDate] = useState<string>("2025-07-30");
 
   return (
@@ -37,8 +37,6 @@ export default function ProductAnalysis() {
               onChange={(e) => setEndDate(e.target.value)}
             />
           </div>
-
-          {/* <Button type="submit">Submit</Button> */}
         </form>
       </div>
 

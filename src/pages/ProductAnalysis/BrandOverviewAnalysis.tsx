@@ -16,6 +16,7 @@ import {
 import { type BrandOverview } from "../../types/productAnalysis.type";
 
 import Plot from "react-plotly.js";
+import { formatLargeNumber } from "../../utils";
 
 interface ProductAnalysisProps {
   startDate: string;
@@ -30,12 +31,6 @@ export default function BrandOverviewAnalysis({
 
   const [loading, setLoading] = useState<boolean>(false);
   const [overviewData, setOverview] = useState<BrandOverview | null>(null);
-
-  const formatLargeNumber = (num: number) => {
-    if (num >= 1_000_000) return (num / 1_000_000).toFixed(3) + "M";
-    if (num >= 1_000) return (num / 1_000).toFixed(1) + "K";
-    return num.toString();
-  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -68,7 +63,7 @@ export default function BrandOverviewAnalysis({
   return (
     <div>
       <form
-        className="mx-auto mt-6 flex flex-wrap items-end gap-4"
+        className="mt-6 ml-32 flex max-w-2xl flex-wrap items-end gap-4"
         onSubmit={handleSubmit}
       >
         <Button type="submit">Reload</Button>

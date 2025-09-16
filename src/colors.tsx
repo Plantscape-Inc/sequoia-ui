@@ -1,13 +1,13 @@
-export const csiCategoryColors = {
-  BFL: "",
+export const CSICategoryColors: Record<string, string> = {
+  BFL: "#669999",
   BIO: "",
-  CLD: "",
+  CLD: "#cc33ff",
   DSGNSER: "",
-  DVD: "",
-  GRD: "",
+  DVD: "#0099ff",
+  GRD: "#99ff33",
   HDW: "",
   LBR: "",
   LED: "",
-  SUR: "",
+  SUR: "#cc3399",
   SYS: "",
 };

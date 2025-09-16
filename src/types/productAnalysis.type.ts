@@ -1,5 +1,18 @@
 export interface CSICategoryAnalysisOverview {
   overview: {
+    misc: Array<MiscTotals>;
+    categoryTotalCounts: {
+      [key: string]: Array<CSICategoryTotalCountCategory>;
+    };
+    categoryTotalRevenues: {
+      [key: string]: Array<CSICategoryTotalRevenueCategory>;
+    };
+    categoryYearlyCounts: {
+      [key: string]: Array<CSICategoryYearlyCountCategory>;
+    };
+    categoryYearlyRevenues: {
+      [key: string]: Array<CSICategoryYearlyRevenueCategory>;
+    };
     categoryMonthlyCountsCategory: {
       [key: string]: Array<CSICategoryMonthlyCountCategory>;
     };
@@ -13,6 +26,36 @@ export interface CSICategoryAnalysisOverview {
       [key: string]: Array<CSICategoryMonthlyRevenueMonth>;
     };
   };
+}
+
+export interface MiscTotals {
+  category: string;
+  count: number;
+  revenue: number;
+}
+
+export interface CSICategoryTotalCountCategory {
+  categoryid: string;
+  totalCount: number;
+  percentage: number;
+}
+
+export interface CSICategoryTotalRevenueCategory {
+  categoryid: string;
+  totalRevenue: number;
+  percentage: number;
+}
+
+export interface CSICategoryYearlyCountCategory {
+  categoryid: string;
+  totalCount: number;
+  percentage: number;
+}
+
+export interface CSICategoryYearlyRevenueCategory {
+  categoryid: string;
+  totalRevenue: number;
+  percentage: number;
 }
 
 export interface CSICategoryMonthlyCountCategory {
