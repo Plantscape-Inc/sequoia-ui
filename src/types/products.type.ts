@@ -1,0 +1,25 @@
+export type CSIProduct = {
+  id: string;
+  baseproductid: string; 
+  name: string;
+  source: string;
+  categoryid: string;
+  subcategoryid: string;
+  productid: string;
+  materialcode: string;
+  sku: string;
+  description?: string;
+  length: number;
+  width: number;
+  height: number;
+  thickness: number;
+  color: string;
+  spacing: string;
+  edge: string;
+  designoption: string;
+  formoption: string;
+  unitofmeasure: string;
+  competitor?: string;
+  acoustics: number;
+  flammability: string;
+};

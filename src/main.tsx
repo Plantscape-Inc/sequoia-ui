@@ -12,6 +12,7 @@ import Home from "./pages/Home.tsx";
 import Account from "./pages/Account.tsx";
 import Orders from "./pages/Orders/Orders.tsx";
 import ProductAnalysis from "./pages/ProductAnalysis/ProductAnalysis.tsx";
+import CSIProducts from "./pages/CSIProducts/CSIProducts.tsx";
 // import ProductAnalysis from "./pages/ProductAnalysis/CSICategoryAnalysis.tsx";
 
 function Root() {
@@ -84,6 +85,7 @@ function Root() {
             <Route path="/orders" element={<Orders />} />
             <Route path="/invoiceauto" element={<InvoiceAuto />} />
             <Route path="/productAnalysis" element={<ProductAnalysis />} />
+            <Route path="/csiProducts" element={<CSIProducts />} />
           </Routes>
         </BrowserRouter>
       </main>
