@@ -11,8 +11,6 @@ export default function InvoiceAuto() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    console.log("submit");
-
     if (!file) {
       alert("Please select a file first");
       return;
@@ -21,10 +19,6 @@ export default function InvoiceAuto() {
     const formData = new FormData();
     formData.append("invoice", file);
 
-    for (const [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
-
     try {
       setLoading(true);
       const response = await fetch(`${API_URL}/parsepdf`, {
@@ -32,13 +26,10 @@ export default function InvoiceAuto() {
         body: formData,
       });
 
-      console.log(response);
 
       if (!response.ok) {
         throw new Error(`Upload failed: ${response.statusText}`);
       }
-
-      console.log(response);
 
       const blob = await response.blob();
 
@@ -59,7 +50,6 @@ export default function InvoiceAuto() {
       a.remove();
       window.URL.revokeObjectURL(url);
 
-      console.log("File download triggered successfully.");
     } catch (err) {
       console.error(err);
     } finally {

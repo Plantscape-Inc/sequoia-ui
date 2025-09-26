@@ -1,6 +1,6 @@
 export type CSIProduct = {
   id: string;
-  baseproductid: string; 
+  baseproductid: string;
   name: string;
   source: string;
   categoryid: string;

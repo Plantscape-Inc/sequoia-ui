@@ -34,9 +34,6 @@ export default function ProductAnalysis() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    console.log("submit", { startDate, endDate });
-
     const params = {
       startDate,
       endDate,
@@ -60,8 +57,6 @@ export default function ProductAnalysis() {
     fetch(`${API_URL}/competitorSales?${queryString}`)
       .then((response) => response.json())
       .then((response) => {
-        console.log("Competitor");
-        console.log(response);
         const temp: CompetitoryProductSummaryList = response;
         setcompProductsRevenueData(temp);
       });

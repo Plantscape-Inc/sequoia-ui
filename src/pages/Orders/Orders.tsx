@@ -31,7 +31,6 @@ export default function Orders() {
         }
       })
       .then((data) => {
-        console.log(data);
         setOrderData(data);
       })
       .finally(() => setLoading(false));

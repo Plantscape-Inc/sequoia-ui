@@ -15,9 +15,16 @@ const sideNavOptions: NavItems = {
   Home: "/",
   Account: "/account",
   "Product Analysis": "/productAnalysis",
-  Epicor: {
-    Orders: "/orders",
-    "Invoice Automation": "/invoiceauto",
+  //   Epicor: {
+  //     Orders: "/orders",
+  //     "Invoice Automation": "/invoiceauto",
+  //   },
+  PsLive: {
+    Home: "/pslive",
+    Orders: "/psliveorders",
+    "Single Order": "/psliveorder",
+    Addresses: "/psliveaddresses",
+    Products: "/psliveproducts",
   },
 };
 

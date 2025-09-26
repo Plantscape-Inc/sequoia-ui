@@ -13,6 +13,12 @@ import Account from "./pages/Account.tsx";
 import Orders from "./pages/Orders/Orders.tsx";
 import ProductAnalysis from "./pages/ProductAnalysis/ProductAnalysis.tsx";
 import CSIProducts from "./pages/CSIProducts/CSIProducts.tsx";
+import PsLiveOrders from "./pages/PsLive/Orders/Orders.tsx";
+import PsLiveOrder from "./pages/PsLive/Orders/Order.tsx";
+import PsLiveAddressEditor from "./pages/PsLive/Address/AddressEditor.tsx";
+import PsLiveAddresses from "./pages/PsLive/Address/Addresses.tsx";
+import PsLiveProducts from "./pages/PsLive/Products/Products.tsx";
+import PsLiveHome from "./pages/PsLive/PsLiveHome.tsx";
 // import ProductAnalysis from "./pages/ProductAnalysis/CSICategoryAnalysis.tsx";
 
 function Root() {
@@ -86,6 +92,13 @@ function Root() {
             <Route path="/invoiceauto" element={<InvoiceAuto />} />
             <Route path="/productAnalysis" element={<ProductAnalysis />} />
             <Route path="/csiProducts" element={<CSIProducts />} />
+
+            <Route path="/pslive" element={<PsLiveHome />} />
+            <Route path="/psliveorders" element={<PsLiveOrders />} />
+            <Route path="/psliveorder" element={<PsLiveOrder />} />
+            <Route path="/psliveaddress" element={<PsLiveAddressEditor />} />
+            <Route path="/psliveaddresses" element={<PsLiveAddresses />} />
+            <Route path="/psliveproducts" element={<PsLiveProducts />} />
           </Routes>
         </BrowserRouter>
       </main>
