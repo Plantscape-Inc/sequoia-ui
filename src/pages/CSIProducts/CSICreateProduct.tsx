@@ -140,7 +140,7 @@ export default function CSICreateProduct({ product }: ProductCardProps) {
         }
         return response.json();
       })
-      .then((data) => {
+      .then(() => {
         setRequestStatus("success");
       })
       .catch((error) => {
