@@ -1,118 +1,148 @@
 import { useEffect, useState } from "react";
 import {
-  Spinner,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeadCell,
-  TableRow,
-  Button,
+    Spinner,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeadCell,
+    TableRow,
+    Button,
 } from "flowbite-react";
 import { Order } from "../../../types/psliveorders.type";
 import { useNavigate } from "react-router-dom";
 
 export default function Orders() {
-  const API_URL = import.meta.env.VITE_PSLIVE_URL;
-  const navigate = useNavigate();
+    const API_URL = import.meta.env.VITE_PSLIVE_URL;
+    const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false);
-  const [ordersData, setOrdersData] = useState<Order[] | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [ordersData, setOrdersData] = useState<Order[] | null>(null);
 
-  useEffect(() => {
-    if (ordersData) return;
+    useEffect(() => {
+        if (ordersData) return;
 
-    setLoading(true);
+        setLoading(true);
 
-    fetch(`${API_URL}/orders`)
-      .then((data) => data.json())
-      .then((data) => {
-        setOrdersData(data);
-      })
-      .finally(() => setLoading(false));
-  }, []);
+        fetch(`${API_URL}/orders`)
+            .then((data) => data.json())
+            .then(setOrdersData)
+            .finally(() => setLoading(false));
+    }, [ordersData, API_URL]);
 
-  interface Result {
-    result: Order;
-  }
+    interface Result {
+        result: Order;
+    }
 
-  const addBlankOrder = () => {
-    fetch(`${API_URL}/newBlankOrder`, {
-      method: "GET",
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Failed to create order");
-        }
-        return res.json();
-      })
-      .then((createdOrder: Result) => {
-        setOrdersData((prev) =>
-          prev ? [createdOrder.result, ...prev] : [createdOrder.result],
+    const addBlankOrder = () => {
+        setLoading(true);
+        fetch(`${API_URL}/newBlankOrder`, { method: "GET" })
+            .then((res) => {
+                if (!res.ok) throw new Error("Failed to create order");
+                return res.json();
+            })
+            .then((createdOrder: Result) => {
+                setOrdersData((prev) =>
+                    prev ? [createdOrder.result, ...prev] : [createdOrder.result]
+                );
+            })
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    };
+
+    const handleDeleteOrder = async (orderid: string | number) => {
+        const confirmed = window.confirm(
+            "Are you sure you want to delete this order?"
         );
+        if (!confirmed) return;
 
-      })
-      .catch((err) => {
-        console.error(err);
-        // optionally show an error message to user
-      })
-      .finally(() => setLoading(false));
-  };
+        try {
+            setLoading(true);
+            const response = await fetch(`${API_URL}/order/${orderid}`, {
+                method: "DELETE",
+            });
+            if (!response.ok) throw new Error("Failed to delete order");
 
-  return (
-    <div>
-      <h1 className="relative text-center text-4xl leading-[125%] font-bold text-gray-900 dark:text-gray-200">
-        Orders
-      </h1>
+            // Remove deleted order from state
+            setOrdersData((prev) =>
+                prev ? prev.filter((order) => order.orderid !== orderid) : null
+            );
+        } catch (err) {
+            console.error(err);
+            alert("An error occurred while deleting the order.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
-      <div className="mt-4 flex justify-center">
-        <Button onClick={addBlankOrder}>Add New Order</Button>
-      </div>
+    return (
+        <div>
+            <h1 className="relative text-center text-4xl leading-[125%] font-bold text-gray-900 dark:text-gray-200">
+                Orders
+            </h1>
 
-      {loading && (
-        <div className="mt-6 flex justify-center">
-          <Spinner size="xl" />
+            <div className="mt-4 flex justify-center">
+                <Button onClick={addBlankOrder}>Add New Order</Button>
+            </div>
+
+            {loading && (
+                <div className="mt-6 flex justify-center">
+                    <Spinner size="xl" />
+                </div>
+            )}
+
+            {!loading && ordersData && (
+                <div className="mt-6">
+                    <Table hoverable>
+                        <TableHead>
+                            <TableHeadCell>Options</TableHeadCell>
+                            <TableHeadCell>Order ID</TableHeadCell>
+                            <TableHeadCell>Account Location ID</TableHeadCell>
+                            <TableHeadCell>Contract Type</TableHeadCell>
+                            <TableHeadCell>Entry Date</TableHeadCell>
+                            <TableHeadCell>Sales Rep</TableHeadCell>
+                            <TableHeadCell>Technician</TableHeadCell>
+                        </TableHead>
+                        <TableBody className="divide-y">
+                            {ordersData.map((order) => (
+                                <TableRow
+                                    key={order.orderid}
+                                    className="bg-white dark:bg-gray-800"
+                                >
+                                    {/* Delete button */}
+                                    <TableCell>
+                                        <Button
+                                            color="failure"
+                                            size="sm"
+                                            onClick={() => handleDeleteOrder(order.orderid)}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </TableCell>
+
+                                    <TableCell
+                                        className="cursor-pointer"
+                                        onClick={() =>
+                                            navigate(`/psliveorder?orderid=${order.orderid}`)
+                                        }
+                                    >
+                                        {order.orderid}
+                                    </TableCell>
+                                    <TableCell>{order.accoutlocid}</TableCell>
+                                    <TableCell>{order.contracttype}</TableCell>
+                                    <TableCell>
+                                        {order.entrydate
+                                            ? new Date(order.entrydate).toLocaleDateString()
+                                            : "-"}
+                                    </TableCell>
+                                    <TableCell>{order.salesrep}</TableCell>
+                                    <TableCell>{order.technician}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            )}
         </div>
-      )}
-
-      {!loading && ordersData && (
-        <div className="mt-6">
-          <Table hoverable>
-            <TableHead>
-              <TableHeadCell>Options</TableHeadCell>
-              <TableHeadCell>Order ID</TableHeadCell>
-              <TableHeadCell>Account Location ID</TableHeadCell>
-              <TableHeadCell>Contract Type</TableHeadCell>
-              <TableHeadCell>Entry Date</TableHeadCell>
-              <TableHeadCell>Sales Rep</TableHeadCell>
-              <TableHeadCell>Technician</TableHeadCell>
-            </TableHead>
-            <TableBody className="divide-y">
-              {ordersData.map((order) => (
-                <TableRow
-                  key={order.orderid}
-                  className="bg-white dark:bg-gray-800"
-                  onClick={() =>
-                    navigate(`/psliveorder?orderid=${order.orderid}`)
-                  }
-                >
-                  <TableCell>{order.orderid}</TableCell>
-                  <TableCell>{order.orderid}</TableCell>
-                  <TableCell>{order.accoutlocid}</TableCell>
-                  <TableCell>{order.contracttype}</TableCell>
-                  <TableCell>
-                    {order.entrydate
-                      ? new Date(order.entrydate).toLocaleDateString()
-                      : "-"}
-                  </TableCell>
-                  <TableCell>{order.salesrep}</TableCell>
-                  <TableCell>{order.technician}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
-    </div>
-  );
+    );
 }
