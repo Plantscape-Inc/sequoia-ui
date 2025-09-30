@@ -27,10 +27,7 @@ export interface OrderLine {
 export interface OrderJobTime {
     id: number;
     orderid: number;
-    option: string;
     fp: number;
-    plntr: number | null;
-    vine: number | null;
     travel: number;
     total: number;
 }
@@ -60,27 +57,35 @@ export interface Product {
 
 
 export type AccountLocationItem = {
-  accountid: string;
-  locationcode: string;
-  productcode: string;
-  productdescription: string;
-  quantity: number;
+    accountid: string;
+    locationcode: string;
+    productcode: string;
+    productdescription: string;
+    quantity: number;
 };
 
 export type AccountLocation = {
-  accountid: string;
-  location: string;
-  locationcode: string;
-  locationitems: AccountLocationItem[];
+    accountid: string;
+    location: string;
+    locationcode: string;
+    locationitems: AccountLocationItem[];
 };
 
 export type Account = {
-  accountid: string;
-  address: number;
-  billtoaddress: number;
-  chemicalinfo: string | null;
-  date: string;
-  locations: AccountLocation[];
-  miscnotes: string | null;
-  waterinfo: string | null;
+    accountid: string;
+    address: number;
+    billtoaddress: number;
+    chemicalinfo: string | null;
+    date: string;
+    locations: AccountLocation[];
+    miscnotes: string | null;
+    waterinfo: string | null;
 };
+
+export type Technician = {
+
+    id: number;
+    firstname: string;
+    lastname: string;
+    techid: string;
+}

@@ -24,6 +24,7 @@ export default function OrderJobTimeRow({ job }: EditableOrderJobTimeRowProps) {
         value: string | number | null,
     ) => {
         const updated = { ...localJob, [field]: value };
+        updated.total = updated.fp  + updated.travel
         setLocalJob(updated);
     };
 
@@ -96,39 +97,9 @@ export default function OrderJobTimeRow({ job }: EditableOrderJobTimeRowProps) {
             <TableCell>{localJob.orderid}</TableCell>
             <TableCell>
                 <TextInput
-                    value={localJob.option}
-                    onChange={(e) => handleFieldChange("option", e.target.value)}
-                />
-            </TableCell>
-            <TableCell>
-                <TextInput
                     type="number"
                     value={localJob.fp}
                     onChange={(e) => handleFieldChange("fp", parseFloat(e.target.value))}
-                />
-            </TableCell>
-            <TableCell>
-                <TextInput
-                    type="number"
-                    value={localJob.plntr ?? 0}
-                    onChange={(e) =>
-                        handleFieldChange(
-                            "plntr",
-                            e.target.value ? parseFloat(e.target.value) : null,
-                        )
-                    }
-                />
-            </TableCell>
-            <TableCell>
-                <TextInput
-                    type="number"
-                    value={localJob.vine ?? 0}
-                    onChange={(e) =>
-                        handleFieldChange(
-                            "vine",
-                            e.target.value ? parseFloat(e.target.value) : null,
-                        )
-                    }
                 />
             </TableCell>
             <TableCell>
@@ -144,6 +115,7 @@ export default function OrderJobTimeRow({ job }: EditableOrderJobTimeRowProps) {
                 <TextInput
                     type="number"
                     value={localJob.total}
+                    contentEditable={false}
                     onChange={(e) =>
                         handleFieldChange("total", parseFloat(e.target.value))
                     }

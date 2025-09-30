@@ -227,6 +227,19 @@ export default function Addresses() {
                     )}
                     <div className="space-y-4">
                         <div>
+                            <Label htmlFor="id">ID</Label>
+                            <TextInput
+                                id="id"
+                                name="id"
+                                readOnly
+                                contentEditable={false}
+                                value={formData?.id || ""}
+                                onChange={handleInputChange}
+                                required
+                                placeholder="Enter primary name"
+                            />
+                        </div>
+                        <div>
                             <Label htmlFor="name1">Name 1</Label>
                             <TextInput
                                 id="name1"

@@ -9,7 +9,7 @@ import {
     TableHeadCell,
     TextInput,
 } from "flowbite-react";
-import { Account } from "../../../types/pslive.type";
+import { Account, type Address } from "../../../types/pslive.type";
 import AccountLocationDisplay from './PsLiveAccountLocationDisplay'
 
 export default function AccountEditor() {
@@ -21,6 +21,9 @@ export default function AccountEditor() {
     const [account, setAccount] = useState<Account | null>(null);
     const [tempAccount, setTempAccount] = useState<Account | null>(null);
 
+    const [, setAddress] = useState<Address | null>(null)
+    const [, setBillToAddress] = useState<Address | null>(null)
+
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const accountParam = params.get("accountid");
@@ -31,14 +34,28 @@ export default function AccountEditor() {
         }
     }, []);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     async function updateAccount(newAccountId: string) {
         if (!newAccountId) return;
 
         setLoading(true);
         try {
-            const data = await (await fetch(`${API_URL}/account/${newAccountId}`)).json();
+            const data: Account = await (await fetch(`${API_URL}/account/${newAccountId}`)).json();
+            console.log(data)
             setAccount(data);
             setTempAccount(data);
+
+            const addressResponse = await (await fetch(`${API_URL}/address/${data.address}`)).json()
+            setAddress(addressResponse)
+
+            if (data.billtoaddress === data.address) {
+                setBillToAddress(addressResponse)
+            } else {
+                const billToAddressResponse = await (await fetch(`${API_URL}/address/${data.billtoaddress}`)).json()
+                setBillToAddress(billToAddressResponse)
+            }
+
+
         } finally {
             setLoading(false);
         }
@@ -82,10 +99,7 @@ export default function AccountEditor() {
                 Account
             </h1>
 
-            <form
-                className="mx-auto mt-6 flex max-w-md flex-col gap-4"
-                onSubmit={handleSubmit}
-            >
+            <form className="mx-auto mt-6 flex max-w-md flex-col gap-4" onSubmit={handleSubmit}>
                 <div>
                     <Label className="mb-2 block" htmlFor="accountid">
                         Enter Account ID
@@ -97,9 +111,21 @@ export default function AccountEditor() {
                         required
                     />
                 </div>
-                <Button type="submit" disabled={loading}>
-                    {loading ? "Loading..." : "Load Account"}
-                </Button>
+                <div className="flex gap-2">
+                    <Button type="submit" disabled={loading}>
+                        {loading ? "Loading..." : "Load Account"}
+                    </Button>
+                    <Button
+                        type="button"
+                        disabled={!accountId}
+                        onClick={() => {
+                            if (!accountId) return;
+                            window.open(`${API_URL}/accountpdf/${accountId}`, "_blank");
+                        }}
+                    >
+                        Download PDF
+                    </Button>
+                </div>
             </form>
 
             {loading && (
@@ -165,10 +191,27 @@ export default function AccountEditor() {
                             />
                         </div>
 
+
                         <div className="mt-4 w-full">
                             <Button type="submit">Update Account</Button>
                         </div>
                     </form>
+
+                    {/* <div className="m-8 mx-auto flex max-w-4xl flex-col justify-center gap-8 md:flex-row">
+                        <div className="flex-1">
+                            <h3 className="mb-2 text-center text-2xl font-bold text-gray-900 dark:text-gray-200">
+                                Billing Address
+                            </h3>
+                            <AddressDisplay address={billToAddress} />
+                        </div>
+
+                        <div className="flex-1">
+                            <h3 className="mb-2 text-center text-2xl font-bold text-gray-900 dark:text-gray-200">
+                                Shipping Address
+                            </h3>
+                            <AddressDisplay address={address} />
+                        </div>
+                    </div> */}
 
                     <div className="m-8">
                         <h3 className="relative text-center text-2xl font-bold text-gray-900 dark:text-gray-200">

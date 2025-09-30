@@ -113,6 +113,12 @@ export default function OrderLine({ line }: EditableOrderLineRowProps) {
             <TableCell>{localLine.orderid}</TableCell>
             <TableCell>
                 <TextInput
+                    value={localLine.plpot}
+                    onChange={(e) => handleFieldChange("plpot", e.target.value)}
+                />
+            </TableCell>
+            <TableCell>
+                <TextInput
                     value={localLine.size}
                     onChange={(e) => handleFieldChange("size", e.target.value)}
                 />
@@ -143,12 +149,7 @@ export default function OrderLine({ line }: EditableOrderLineRowProps) {
                     }
                 />
             </TableCell>
-            <TableCell>
-                <TextInput
-                    value={localLine.plpot}
-                    onChange={(e) => handleFieldChange("plpot", e.target.value)}
-                />
-            </TableCell>
+
         </TableRow>
     );
 }

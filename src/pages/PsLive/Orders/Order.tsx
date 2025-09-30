@@ -150,8 +150,6 @@ export default function OrderEditor() {
             orderid: order!.orderid,
             option: "",
             fp: 0,
-            plntr: null,
-            vine: null,
             travel: 0,
             total: 0,
         };
@@ -177,6 +175,31 @@ export default function OrderEditor() {
         } catch (error) {
             alert(`Error updating order line: ${error}`);
             return { success: false, message: (error as Error).message };
+        } finally {
+            setLoading(false);
+        }
+    };
+    const handleUpdate = async () => {
+        if (!tempOrder) return;
+
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_URL}/order/${tempOrder.orderid}`, {
+                method: "PUT", // assuming your backend expects PUT
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(tempOrder),
+            });
+
+            if (!response.ok) throw new Error("Failed to update order");
+
+            // Reload the order from the server
+            await updateOrder(tempOrder.orderid);
+            alert("Order updated successfully!");
+        } catch (err) {
+            console.error(err);
+            alert("Failed to update order.");
         } finally {
             setLoading(false);
         }
@@ -239,6 +262,8 @@ export default function OrderEditor() {
                             onSubmit={(e) => {
                                 e.preventDefault();
                                 // onSubmit(order);
+                                // updateOrder(order);
+                                handleUpdate()
                             }}
                         >
                             <div className="flex min-w-[200px] flex-1 flex-col gap-4">
@@ -317,11 +342,12 @@ export default function OrderEditor() {
                                     <TableHeadCell>Delete</TableHeadCell>
                                     <TableHeadCell>ID</TableHeadCell>
                                     <TableHeadCell>Order ID</TableHeadCell>
+                                    <TableHeadCell>PLPOT</TableHeadCell>
                                     <TableHeadCell>Size</TableHeadCell>
                                     <TableHeadCell>Cost</TableHeadCell>
                                     <TableHeadCell>Extension</TableHeadCell>
                                     <TableHeadCell>Product Description</TableHeadCell>
-                                    <TableHeadCell>PLPOT</TableHeadCell>
+
                                 </TableHead>
                                 <TableBody className="divide-y">
                                     {order.lines.map((line) => (
@@ -352,10 +378,7 @@ export default function OrderEditor() {
                                     <TableHeadCell>Delete</TableHeadCell>
                                     <TableHeadCell>ID</TableHeadCell>
                                     <TableHeadCell>Order ID</TableHeadCell>
-                                    <TableHeadCell>Option</TableHeadCell>
                                     <TableHeadCell>FP</TableHeadCell>
-                                    <TableHeadCell>Plntr</TableHeadCell>
-                                    <TableHeadCell>Vine</TableHeadCell>
                                     <TableHeadCell>Travel</TableHeadCell>
                                     <TableHeadCell>Total</TableHeadCell>
                                 </TableHead>

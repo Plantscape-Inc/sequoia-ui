@@ -25,6 +25,7 @@ const sideNavOptions: NavItems = {
         Orders: "/psliveorders",
         Addresses: "/psliveaddresses",
         Products: "/psliveproducts",
+        Technicians: "/pslivetechnicians",
         "Single Order": "/psliveorder",
     },
 };

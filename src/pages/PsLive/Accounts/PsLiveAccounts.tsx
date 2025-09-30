@@ -23,12 +23,11 @@ export default function Accounts() {
         if (accountsData) return;
 
         setLoading(true);
-
         fetch(`${API_URL}/accounts`)
             .then((data) => data.json())
             .then(setAccountsData)
             .finally(() => setLoading(false));
-    }, [accountsData, API_URL]);
+    }, []);
 
     interface Result {
         result: Account;
@@ -97,8 +96,8 @@ export default function Accounts() {
                         <TableHead>
                             <TableHeadCell>Options</TableHeadCell>
                             <TableHeadCell>Account ID</TableHeadCell>
-                            <TableHeadCell>Address</TableHeadCell>
-                            <TableHeadCell>Bill To Address</TableHeadCell>
+                            {/* <TableHeadCell>Address</TableHeadCell>
+                            <TableHeadCell>Bill To Address</TableHeadCell> */}
                             <TableHeadCell>Date</TableHeadCell>
                             <TableHeadCell>Locations</TableHeadCell>
                         </TableHead>
@@ -126,8 +125,8 @@ export default function Accounts() {
                                     </TableCell>
 
                                     <TableCell>{account.accountid}</TableCell>
-                                    <TableCell>{account.address}</TableCell>
-                                    <TableCell>{account.billtoaddress}</TableCell>
+                                    {/* <TableCell>{account.address}</TableCell>
+                                    <TableCell>{account.billtoaddress}</TableCell> */}
                                     <TableCell>
                                         {account.date
                                             ? new Date(account.date).toLocaleDateString()
