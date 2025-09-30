@@ -17,7 +17,7 @@ import {
     Alert,
 } from "flowbite-react";
 
-import { Address } from "../../../types/psliveorders.type";
+import { Address } from "../../../types/pslive.type";
 
 export default function Addresses() {
     const API_URL = import.meta.env.VITE_PSLIVE_URL;
@@ -130,7 +130,6 @@ export default function Addresses() {
     // Handle delete
     const handleDelete = async () => {
         if (!editingAddress) return;
-        console.log(editingAddress)
 
         const confirmed = window.confirm(
             "Are you sure you want to delete this address?"

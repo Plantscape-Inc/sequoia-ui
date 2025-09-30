@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { TableCell, TableRow, Button, TextInput } from "flowbite-react";
-import { Product } from "../../../types/psliveorders.type";
+import { Product } from "../../../types/pslive.type";
 
 type Props = {
     product: Product;

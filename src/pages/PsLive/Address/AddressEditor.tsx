@@ -1,5 +1,5 @@
 import { Label, TextInput, Button } from "flowbite-react";
-import { Address } from "../../../types/psliveorders.type";
+import { Address } from "../../../types/pslive.type";
 import { useState, useEffect } from "react";
 
 export default function AddressDisplay() {
@@ -58,7 +58,6 @@ export default function AddressDisplay() {
             });
 
             const data = await response.json();
-            console.log("response")
 
             if (!response.ok) {
                 throw new Error(data.message || "Failed to update address");
@@ -207,7 +206,6 @@ export default function AddressDisplay() {
                     <Button
                         className="mt-6"
                         onClick={() => {
-                            console.log("Updated local address:", localAddress)
                             updateAddress()
                         }}
                     >

@@ -57,3 +57,30 @@ export interface Product {
     height: string;
     price: number;
 }
+
+
+export type AccountLocationItem = {
+  accountid: string;
+  locationcode: string;
+  productcode: string;
+  productdescription: string;
+  quantity: number;
+};
+
+export type AccountLocation = {
+  accountid: string;
+  location: string;
+  locationcode: string;
+  locationitems: AccountLocationItem[];
+};
+
+export type Account = {
+  accountid: string;
+  address: number;
+  billtoaddress: number;
+  chemicalinfo: string | null;
+  date: string;
+  locations: AccountLocation[];
+  miscnotes: string | null;
+  waterinfo: string | null;
+};

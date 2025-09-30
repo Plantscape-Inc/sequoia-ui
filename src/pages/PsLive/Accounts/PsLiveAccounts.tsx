@@ -9,67 +9,67 @@ import {
     TableRow,
     Button,
 } from "flowbite-react";
-import { Order } from "../../../types/pslive.type";
+import { Account } from "../../../types/pslive.type";
 import { useNavigate } from "react-router-dom";
 
-export default function Orders() {
+export default function Accounts() {
     const API_URL = import.meta.env.VITE_PSLIVE_URL;
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState(false);
-    const [ordersData, setOrdersData] = useState<Order[] | null>(null);
+    const [accountsData, setAccountsData] = useState<Account[] | null>(null);
 
     useEffect(() => {
-        if (ordersData) return;
+        if (accountsData) return;
 
         setLoading(true);
 
-        fetch(`${API_URL}/orders`)
+        fetch(`${API_URL}/accounts`)
             .then((data) => data.json())
-            .then(setOrdersData)
+            .then(setAccountsData)
             .finally(() => setLoading(false));
-    }, [ordersData, API_URL]);
+    }, [accountsData, API_URL]);
 
     interface Result {
-        result: Order;
+        result: Account;
     }
 
-    const addBlankOrder = () => {
+    const addBlankAccount = () => {
         setLoading(true);
-        fetch(`${API_URL}/newBlankOrder`, { method: "GET" })
+        fetch(`${API_URL}/newBlankAccount`, { method: "GET" })
             .then((res) => {
-                if (!res.ok) throw new Error("Failed to create order");
+                if (!res.ok) throw new Error("Failed to create account");
                 return res.json();
             })
-            .then((createdOrder: Result) => {
-                setOrdersData((prev) =>
-                    prev ? [createdOrder.result, ...prev] : [createdOrder.result]
+            .then((createdAccount: Result) => {
+                setAccountsData((prev) =>
+                    prev ? [createdAccount.result, ...prev] : [createdAccount.result]
                 );
             })
             .catch(console.error)
             .finally(() => setLoading(false));
     };
 
-    const handleDeleteOrder = async (orderid: string | number) => {
+    const handleDeleteAccount = async (accountid: string | number) => {
         const confirmed = window.confirm(
-            "Are you sure you want to delete this order?"
+            "Are you sure you want to delete this account?"
         );
         if (!confirmed) return;
 
         try {
             setLoading(true);
-            const response = await fetch(`${API_URL}/order/${orderid}`, {
+            const response = await fetch(`${API_URL}/account/${accountid}`, {
                 method: "DELETE",
             });
-            if (!response.ok) throw new Error("Failed to delete order");
+            if (!response.ok) throw new Error("Failed to delete account");
 
-            // Remove deleted order from state
-            setOrdersData((prev) =>
-                prev ? prev.filter((order) => order.orderid !== orderid) : null
+            // Remove deleted account from state
+            setAccountsData((prev) =>
+                prev ? prev.filter((account) => account.accountid !== accountid) : null
             );
         } catch (err) {
             console.error(err);
-            alert("An error occurred while deleting the order.");
+            alert("An error occurred while deleting the account.");
         } finally {
             setLoading(false);
         }
@@ -78,11 +78,11 @@ export default function Orders() {
     return (
         <div>
             <h1 className="relative text-center text-4xl leading-[125%] font-bold text-gray-900 dark:text-gray-200">
-                Orders
+                Accounts
             </h1>
 
             <div className="mt-4 flex justify-center">
-                <Button onClick={addBlankOrder}>Add New Order</Button>
+                <Button onClick={addBlankAccount}>Add New Account</Button>
             </div>
 
             {loading && (
@@ -91,25 +91,24 @@ export default function Orders() {
                 </div>
             )}
 
-            {!loading && ordersData && (
+            {!loading && accountsData && (
                 <div className="mt-6">
                     <Table hoverable>
                         <TableHead>
                             <TableHeadCell>Options</TableHeadCell>
-                            <TableHeadCell>Order ID</TableHeadCell>
-                            <TableHeadCell>Account Location ID</TableHeadCell>
-                            <TableHeadCell>Contract Type</TableHeadCell>
-                            <TableHeadCell>Entry Date</TableHeadCell>
-                            <TableHeadCell>Sales Rep</TableHeadCell>
-                            <TableHeadCell>Technician</TableHeadCell>
+                            <TableHeadCell>Account ID</TableHeadCell>
+                            <TableHeadCell>Address</TableHeadCell>
+                            <TableHeadCell>Bill To Address</TableHeadCell>
+                            <TableHeadCell>Date</TableHeadCell>
+                            <TableHeadCell>Locations</TableHeadCell>
                         </TableHead>
                         <TableBody className="divide-y">
-                            {ordersData.map((order) => (
+                            {accountsData.map((account) => (
                                 <TableRow
-                                    key={order.orderid}
+                                    key={account.accountid}
                                     className="bg-white dark:bg-gray-800"
                                     onClick={() =>
-                                        navigate(`/psliveorder?orderid=${order.orderid}`)
+                                        navigate(`/psliveaccount?accountid=${account.accountid}`)
                                     }
                                 >
                                     {/* Delete button */}
@@ -119,28 +118,26 @@ export default function Orders() {
                                             size="sm"
                                             onClick={(e) => {
                                                 e.preventDefault();
-                                                handleDeleteOrder(order.orderid)
+                                                handleDeleteAccount(account.accountid);
                                             }}
                                         >
                                             Delete
                                         </Button>
                                     </TableCell>
 
-                                    <TableCell
-                                        className="cursor-pointer"
-
-                                    >
-                                        {order.orderid}
-                                    </TableCell>
-                                    <TableCell>{order.accoutlocid}</TableCell>
-                                    <TableCell>{order.contracttype}</TableCell>
+                                    <TableCell>{account.accountid}</TableCell>
+                                    <TableCell>{account.address}</TableCell>
+                                    <TableCell>{account.billtoaddress}</TableCell>
                                     <TableCell>
-                                        {order.entrydate
-                                            ? new Date(order.entrydate).toLocaleDateString()
+                                        {account.date
+                                            ? new Date(account.date).toLocaleDateString()
                                             : "-"}
                                     </TableCell>
-                                    <TableCell>{order.salesrep}</TableCell>
-                                    <TableCell>{order.technician}</TableCell>
+                                    <TableCell>
+                                        {account.locations.length > 0
+                                            ? account.locations.map((loc) => loc.location).join(", ")
+                                            : "-"}
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
