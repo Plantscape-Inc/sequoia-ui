@@ -113,42 +113,11 @@ export default function OrderLine({ line }: EditableOrderLineRowProps) {
             <TableCell>{localLine.orderid}</TableCell>
             <TableCell>
                 <TextInput
-                    value={localLine.plpot}
-                    onChange={(e) => handleFieldChange("plpot", e.target.value)}
+                    value={localLine.productcode}
+                    onChange={(e) => handleFieldChange("productcode", e.target.value)}
                 />
             </TableCell>
-            <TableCell>
-                <TextInput
-                    value={localLine.size}
-                    onChange={(e) => handleFieldChange("size", e.target.value)}
-                />
-            </TableCell>
-            <TableCell>
-                <TextInput
-                    type="number"
-                    value={localLine.cost}
-                    onChange={(e) =>
-                        handleFieldChange("cost", parseFloat(e.target.value))
-                    }
-                />
-            </TableCell>
-            <TableCell>
-                <TextInput
-                    type="number"
-                    value={localLine.extension}
-                    onChange={(e) =>
-                        handleFieldChange("extension", parseFloat(e.target.value))
-                    }
-                />
-            </TableCell>
-            <TableCell>
-                <TextInput
-                    value={localLine.productdescription}
-                    onChange={(e) =>
-                        handleFieldChange("productdescription", e.target.value)
-                    }
-                />
-            </TableCell>
+
 
         </TableRow>
     );

@@ -17,19 +17,7 @@ export interface Address {
 export interface OrderLine {
     id: number;
     orderid: number;
-    size: string;
-    cost: number;
-    extension: number;
-    productdescription: string;
-    plpot: string;
-}
-
-export interface OrderJobTime {
-    id: number;
-    orderid: number;
-    fp: number;
-    travel: number;
-    total: number;
+    productcode: string;
 }
 
 export interface Order {
@@ -43,8 +31,10 @@ export interface Order {
     technician: string;
     billing_address: Address;
     shipping_address: Address;
+    fp: number;
+    travel: number;
+    total: number;
     lines: OrderLine[];
-    jobtimes: OrderJobTime[];
 }
 
 export interface Product {

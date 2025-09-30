@@ -5,18 +5,17 @@ import {
     Spinner,
     Table,
     TableBody,
+    TableCell,
     TableHead,
     TableHeadCell,
     TextInput,
 } from "flowbite-react";
 import {
     Order,
-    OrderJobTime,
     OrderLine,
 } from "../../../types/pslive.type";
 import OrderLineDisplay from "./OrderLine";
 import AddressDisplay from "../Address/AddressDisplay";
-import OrderJobTimeDisplay from "./OrderJobTime";
 
 export default function OrderEditor() {
     const API_URL = import.meta.env.VITE_PSLIVE_URL;
@@ -59,6 +58,7 @@ export default function OrderEditor() {
     //     if (orderId || orderId <= 0 || orderId === order?.orderid)
     //         return
 
+
     //     setLoading(true)
 
     //     updateOrder(orderId)
@@ -70,7 +70,10 @@ export default function OrderEditor() {
 
     const handleChange = (field: keyof Order, value: unknown) => {
         if (!tempOrder) return;
-        setTempOrder({ ...tempOrder, [field]: value } as Order);
+        const updated = { ...tempOrder, [field]: value } as Order;
+        updated.total = updated.fp + updated.travel;
+        console.log(updated)
+        setTempOrder(updated);
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -112,51 +115,12 @@ export default function OrderEditor() {
         const emptyOrderLine: OrderLine = {
             id: Math.random() * 1000000,
             orderid: order!.orderid,
-            size: "",
-            cost: 0,
-            extension: 0,
-            productdescription: "",
-            plpot: "",
+            productcode: "",
         };
 
         setLoading(true);
         try {
             const response = await fetch(`${API_URL}/orderline`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(emptyOrderLine),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message);
-            }
-
-            await updateOrder(orderId);
-
-            return;
-        } catch (error) {
-            alert(`Error updating order line: ${error}`);
-            return { success: false, message: (error as Error).message };
-        } finally {
-            setLoading(false);
-        }
-    };
-    const addOrderJobTimes = async () => {
-        const emptyOrderLine: OrderJobTime = {
-            id: Math.random() * 1000000,
-            orderid: order!.orderid,
-            option: "",
-            fp: 0,
-            travel: 0,
-            total: 0,
-        };
-
-        setLoading(true);
-        try {
-            const response = await fetch(`${API_URL}/orderjobtime`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -266,6 +230,11 @@ export default function OrderEditor() {
                                 handleUpdate()
                             }}
                         >
+                            {/* Submit Button */}
+                            <div className="mt-4 w-full">
+                                <Button type="submit">Update Order</Button>
+                            </div>
+
                             <div className="flex min-w-[200px] flex-1 flex-col gap-4">
                                 <Label htmlFor="accoutlocid">Account Location ID</Label>
                                 <TextInput
@@ -316,11 +285,49 @@ export default function OrderEditor() {
                                 />
                             </div>
 
-                            {/* Submit Button */}
-                            <div className="mt-4 w-full">
-                                <Button type="submit">Update Order</Button>
+                            <div className="m-8">
+                                <h3 className="relative m-2 text-center text-2xl leading-[125%] font-bold text-gray-900 dark:text-gray-200">
+                                    Order Job Times
+                                </h3>
+                                <Table hoverable>
+                                    <TableHead>
+                                        <TableHeadCell>FP</TableHeadCell>
+                                        <TableHeadCell>Travel</TableHeadCell>
+                                        <TableHeadCell>Total</TableHeadCell>
+                                    </TableHead>
+                                    <TableBody className="divide-y">
+
+                                        <TableCell>
+                                            <TextInput
+                                                type="number"
+                                                value={tempOrder.fp}
+                                                onChange={(e) => handleChange("fp", parseFloat(e.target.value))}
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <TextInput
+                                                type="number"
+                                                value={tempOrder.travel}
+                                                onChange={(e) =>
+                                                    handleChange("travel", parseFloat(e.target.value))
+                                                }
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <TextInput
+                                                type="number"
+                                                value={tempOrder.total}
+                                                contentEditable={false}
+                                                onChange={(e) =>
+                                                    handleChange("total", parseFloat(e.target.value))
+                                                }
+                                            />
+                                        </TableCell>
+                                    </TableBody>
+                                </Table>
                             </div>
                         </form>
+
 
                         <div className="m-8">
                             <h3 className="relative m-2 text-center text-2xl leading-[125%] font-bold text-gray-900 dark:text-gray-200">
@@ -342,11 +349,7 @@ export default function OrderEditor() {
                                     <TableHeadCell>Delete</TableHeadCell>
                                     <TableHeadCell>ID</TableHeadCell>
                                     <TableHeadCell>Order ID</TableHeadCell>
-                                    <TableHeadCell>PLPOT</TableHeadCell>
-                                    <TableHeadCell>Size</TableHeadCell>
-                                    <TableHeadCell>Cost</TableHeadCell>
-                                    <TableHeadCell>Extension</TableHeadCell>
-                                    <TableHeadCell>Product Description</TableHeadCell>
+                                    <TableHeadCell>Product</TableHeadCell>
 
                                 </TableHead>
                                 <TableBody className="divide-y">
@@ -357,38 +360,7 @@ export default function OrderEditor() {
                             </Table>
                         </div>
 
-                        <div className="m-8">
-                            <h3 className="relative m-2 text-center text-2xl leading-[125%] font-bold text-gray-900 dark:text-gray-200">
-                                Order Job Times
-                            </h3>
-                            <div className="mt-4 w-full">
-                                <Button
-                                    type="submit"
-                                    onClick={() => {
-                                        addOrderJobTimes();
-                                    }}
-                                >
-                                    Add Order Job Time
-                                </Button>
-                            </div>
-                            <Table hoverable>
-                                <TableHead>
-                                    <TableHeadCell></TableHeadCell>{" "}
-                                    {/* e.g., for selection or edit */}
-                                    <TableHeadCell>Delete</TableHeadCell>
-                                    <TableHeadCell>ID</TableHeadCell>
-                                    <TableHeadCell>Order ID</TableHeadCell>
-                                    <TableHeadCell>FP</TableHeadCell>
-                                    <TableHeadCell>Travel</TableHeadCell>
-                                    <TableHeadCell>Total</TableHeadCell>
-                                </TableHead>
-                                <TableBody className="divide-y">
-                                    {order.jobtimes.map((job) => (
-                                        <OrderJobTimeDisplay key={job.id} job={job} />
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </div>
+
                     </div>
                 )}
             </div>
