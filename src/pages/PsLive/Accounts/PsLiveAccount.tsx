@@ -3,10 +3,6 @@ import {
     Button,
     Label,
     Spinner,
-    Table,
-    TableBody,
-    TableHead,
-    TableHeadCell,
     TextInput,
 } from "flowbite-react";
 import { Account, type Address } from "../../../types/pslive.type";
@@ -214,33 +210,59 @@ export default function AccountEditor() {
                     </div> */}
 
                     <div className="m-8">
-                        <h3 className="relative text-center text-2xl font-bold text-gray-900 dark:text-gray-200">
-                            Account Locations
-                        </h3>
-                        <Table hoverable>
-                            <TableHead>
-                                <TableHeadCell>ID</TableHeadCell>
-                                <TableHeadCell>Options</TableHeadCell>
-                                <TableHeadCell>Location</TableHeadCell>
-                                <TableHeadCell>Location Code</TableHeadCell>
-                                <TableHeadCell>Items</TableHeadCell>
-                            </TableHead>
-                            <TableBody className="divide-y">
-                                {account.locations.map((location) => {
-                                    return (
-                                        <AccountLocationDisplay
-                                            key={location.locationcode}
-                                            location={location}
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="relative text-center text-2xl font-bold text-gray-900 dark:text-gray-200">
+                                Account Locations
+                            </h3>
+                            <Button
+                                color="blue"
+                                onClick={async () => {
+                                    const API_URL = import.meta.env.VITE_PSLIVE_URL;
 
-                                        />
+                                    const newLocation = {
+                                        id: Math.floor(Math.random() * 10000) + 1,
+                                        accountid: account.accountid,
+                                        location: "New Location",
+                                        locationcode: "NewCode", // or let backend assign
+                                        locationitems: [],
+                                    };
 
-                                    )
-                                })}
-                            </TableBody>
-                        </Table>
+                                    try {
+                                        const response = await fetch(`${API_URL}/accountlocation`, {
+                                            method: "POST",
+                                            headers: {
+                                                "Content-Type": "application/json",
+                                            },
+                                            body: JSON.stringify(newLocation),
+                                        });
+
+                                        if (!response.ok) {
+                                            const errorData = await response.json();
+                                            throw new Error(errorData.message);
+                                        }
+
+                                        alert("Account location created successfully");
+                                        window.location.reload(); // refresh to show new location
+                                    } catch (error) {
+                                        console.error("Error creating location:", error);
+                                        alert(`Error creating location: ${error}`);
+                                    }
+                                }}
+                            >
+                                + Add Location
+                            </Button>
+                        </div>
+
+                        {account.locations.map((location) => (
+                            <AccountLocationDisplay
+                                key={location.locationcode}
+                                location={location}
+                            />
+                        ))}
                     </div>
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }

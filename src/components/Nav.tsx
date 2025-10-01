@@ -115,6 +115,7 @@ export default function Nav() {
                     {/* <NavbarLink href="/">
                         Home
                     </NavbarLink> */}
+                    <NavbarLink href="/pslive">Plantscape Live Home</NavbarLink>
                     <NavbarLink href="/account">Account</NavbarLink>
                 </NavbarCollapse>
                 <DarkThemeToggle />

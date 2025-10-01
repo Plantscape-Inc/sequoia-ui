@@ -47,14 +47,15 @@ export interface Product {
 
 
 export type AccountLocationItem = {
+    id: number;
     accountid: string;
     locationcode: string;
     productcode: string;
-    productdescription: string;
     quantity: number;
 };
 
 export type AccountLocation = {
+    id: number;
     accountid: string;
     location: string;
     locationcode: string;
@@ -73,7 +74,6 @@ export type Account = {
 };
 
 export type Technician = {
-
     id: number;
     firstname: string;
     lastname: string;

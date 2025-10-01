@@ -56,9 +56,10 @@ export default function AccountLocationItemDisplay({ item }: EditableAccountLoca
 
 
     const deleteItem = async () => {
+        console.log(item)
         try {
             const response = await fetch(
-                `${API_URL}/accountlocation/${item.accountid}/${item.locationcode}/item/${item.productcode}`,
+                `${API_URL}/accountlocation/${item.id}/${item.locationcode}/item/${item.productcode}`,
                 {
                     method: "DELETE",
                 }
@@ -69,6 +70,7 @@ export default function AccountLocationItemDisplay({ item }: EditableAccountLoca
                 throw new Error(errorData.message);
             }
         } catch (error) {
+            console.error(error)
             alert(`Error deleting item: ${error}`);
         } finally {
             window.location.reload();
@@ -102,12 +104,6 @@ export default function AccountLocationItemDisplay({ item }: EditableAccountLoca
                 <TextInput
                     value={localItem.productcode}
                     onChange={(e) => handleFieldChange("productcode", e.target.value)}
-                />
-            </TableCell>
-            <TableCell>
-                <TextInput
-                    value={localItem.productdescription}
-                    onChange={(e) => handleFieldChange("productdescription", e.target.value)}
                 />
             </TableCell>
             <TableCell>
