@@ -22,6 +22,7 @@ import PsLiveHome from "./pages/PsLive/PsLiveHome.tsx";
 import PsLiveAccounts from "./pages/PsLive/Accounts/PsLiveAccounts.tsx";
 import PsLiveAccount from "./pages/PsLive/Accounts/PsLiveAccount.tsx";
 import PsLiveTechnicians from "./pages/PsLive/Technicians.tsx";
+import PsLiveSchedule from "./pages/PsLive/Schedule/Schedule.tsx";
 // import ProductAnalysis from "./pages/ProductAnalysis/CSICategoryAnalysis.tsx";
 
 function Root() {
@@ -105,6 +106,7 @@ function Root() {
                         <Route path="/psliveaccount" element={<PsLiveAccount />} />
                         <Route path="/psliveaccounts" element={<PsLiveAccounts />} />
                         <Route path="/pslivetechnicians" element={<PsLiveTechnicians />} />
+                        <Route path="/psliveschedule" element={<PsLiveSchedule />} />
                     </Routes>
                 </BrowserRouter>
             </main>

@@ -79,3 +79,13 @@ export type Technician = {
     lastname: string;
     techid: string;
 }
+
+export type ScheduleLine = {
+    id: number;
+    technician: string;
+    day: string;
+    orderid: number;
+    account: string;
+    totalmins: number;
+    zipcode: number
+}

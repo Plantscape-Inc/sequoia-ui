@@ -30,7 +30,7 @@ export default function AccountEditor() {
         }
     }, []);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     async function updateAccount(newAccountId: string) {
         if (!newAccountId) return;
 
