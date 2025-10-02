@@ -9,8 +9,12 @@ import {
     TableHead,
     TableHeadCell,
     TextInput,
+    Modal,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
 } from "flowbite-react";
-import { ScheduleLine } from "../../../types/pslive.type";
+import { ScheduleLine, Technician } from "../../../types/pslive.type";
 
 export default function ScheduleEditor() {
     const API_URL = import.meta.env.VITE_PSLIVE_URL;
@@ -19,8 +23,14 @@ export default function ScheduleEditor() {
     const [loading, setLoading] = useState(false);
     const [schedule, setSchedule] = useState<ScheduleLine[]>([]);
 
+    // For Technician Modal
+    const [showTechModal, setShowTechModal] = useState(false);
+    const [technicians, setTechnicians] = useState<Technician[]>([]);
+    const [selectedLineId, setSelectedLineId] = useState<number | null>(null);
+
+    const params = new URLSearchParams(window.location.search);
     useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
+
         const techparam = params.get("techid");
 
         if (techparam) {
@@ -29,22 +39,35 @@ export default function ScheduleEditor() {
         }
     }, []);
 
-
     async function fetchSchedule(id: string) {
         if (!id) return;
         setLoading(true);
         try {
             const response = await fetch(`${API_URL}/schedule/${id}`);
-            if (!response.ok) throw new Error("Failed to fetch schedule");
+            if (!response.ok) {
+                throw (await response.json());
+                // console.error(await response.json())
+            }
 
             const data: ScheduleLine[] = await response.json();
-            console.log(data)
             setSchedule(data);
         } catch (err) {
             console.error(err);
-            alert("Error fetching schedule");
+            alert(`Error fetching schedule: ${JSON.stringify(err)}`);
         } finally {
             setLoading(false);
+        }
+    }
+
+    async function fetchTechnicians() {
+        try {
+            const response = await fetch(`${API_URL}/technicians`);
+            if (!response.ok) throw new Error("Failed to fetch technicians");
+            const data: Technician[] = await response.json();
+            setTechnicians(data);
+        } catch (err) {
+            console.error(err);
+            alert("Error fetching technicians");
         }
     }
 
@@ -74,9 +97,7 @@ export default function ScheduleEditor() {
                 body: JSON.stringify(line),
             });
 
-            // if (!response.ok) throw new Error("Failed to update schedule");
-            console.log(await response.json())
-
+            console.log(await response.json());
             alert("Schedule updated!");
             fetchSchedule(techId);
         } catch (err) {
@@ -108,13 +129,11 @@ export default function ScheduleEditor() {
     };
 
     const addScheduleLine = async () => {
-        const newLine: Omit<ScheduleLine, "id"> = {
+        const newLine: Omit<ScheduleLine, "account" | "totalmins" | "zipcode"> = {
+            id: Math.floor(Math.random() * 10000) + 1,
             technician: techId,
-            day: "",
-            orderid: -1,
-            account: "",
-            totalmins: 0,
-            zipcode: 0,
+            day: "MON",
+            orderid: 3354,
         };
 
         setLoading(true);
@@ -136,6 +155,21 @@ export default function ScheduleEditor() {
         }
     };
 
+    // Open technician modal for a given line
+    const openTechModal = (lineId: number) => {
+        setSelectedLineId(lineId);
+        setShowTechModal(true);
+        fetchTechnicians();
+    };
+
+    // Select technician for a line
+    const selectTechnician = (tech: Technician) => {
+        if (!selectedLineId) return;
+        handleChange(selectedLineId, "technician", tech.techid);
+        setShowTechModal(false);
+        setSelectedLineId(null);
+    };
+
     return (
         <div>
             <h1 className="relative text-center text-4xl font-bold text-gray-900 dark:text-gray-200">
@@ -155,7 +189,12 @@ export default function ScheduleEditor() {
                         id="techid"
                         type="text"
                         value={techId}
-                        onChange={(e) => setTechId(e.target.value)}
+                        onChange={(e) => {
+                            const newParams = new URLSearchParams(window.location.search);
+                            newParams.set("techid", e.target.value);
+                            window.history.replaceState({}, "", `${window.location.pathname}?${newParams.toString()}`);
+                            setTechId(e.target.value)
+                        }}
                         required
                     />
                 </div>
@@ -171,7 +210,7 @@ export default function ScheduleEditor() {
             )}
 
             {/* Schedule Table */}
-            {schedule.length > 0 && (
+            {schedule && (
                 <div className="m-8">
                     <div className="flex justify-between items-center">
                         <h3 className="m-2 text-2xl font-bold text-gray-900 dark:text-gray-200">
@@ -194,12 +233,18 @@ export default function ScheduleEditor() {
                                 <tr key={line.id}>
                                     <TableCell>{line.id}</TableCell>
                                     <TableCell>
-                                        <TextInput
-                                            value={line.technician}
-                                            onChange={(e) =>
-                                                handleChange(line.id, "technician", e.target.value)
-                                            }
-                                        />
+                                        <div className="flex gap-2 items-center">
+                                            <TextInput
+                                                value={line.technician}
+                                                readOnly
+                                            />
+                                            <Button
+                                                size="xs"
+                                                onClick={() => openTechModal(line.id)}
+                                            >
+                                                Select
+                                            </Button>
+                                        </div>
                                     </TableCell>
                                     <TableCell>
                                         <TextInput
@@ -214,9 +259,6 @@ export default function ScheduleEditor() {
                                             type="string"
                                             value={line.account}
                                             readOnly
-                                            onChange={(e) =>
-                                                handleChange(line.id, "account", e.target.value)
-                                            }
                                         />
                                     </TableCell>
                                     <TableCell>
@@ -224,9 +266,6 @@ export default function ScheduleEditor() {
                                             type="number"
                                             value={line.totalmins}
                                             readOnly
-                                            onChange={(e) =>
-                                                handleChange(line.id, "totalmins", Number(e.target.value))
-                                            }
                                         />
                                     </TableCell>
                                     <TableCell>
@@ -234,9 +273,6 @@ export default function ScheduleEditor() {
                                             type="number"
                                             value={line.zipcode}
                                             readOnly
-                                            onChange={(e) =>
-                                                handleChange(line.id, "zipcode", Number(e.target.value))
-                                            }
                                         />
                                     </TableCell>
                                     <TableCell className="flex gap-2">
@@ -257,6 +293,40 @@ export default function ScheduleEditor() {
                     </Table>
                 </div>
             )}
+
+            {/* Technician Selection Modal */}
+            <Modal show={showTechModal} size="4xl" onClose={() => setShowTechModal(false)}>
+                <ModalHeader>Select Technician</ModalHeader>
+                <ModalBody>
+                    <Table hoverable>
+                        <TableHead>
+                            <TableHeadCell>First Name</TableHeadCell>
+                            <TableHeadCell>Last Name</TableHeadCell>
+                            <TableHeadCell>Tech ID</TableHeadCell>
+                            <TableHeadCell>Select</TableHeadCell>
+                        </TableHead>
+                        <TableBody>
+                            {technicians.map((tech) => (
+                                <tr key={tech.id}>
+                                    <TableCell>{tech.firstname}</TableCell>
+                                    <TableCell>{tech.lastname}</TableCell>
+                                    <TableCell>{tech.techid}</TableCell>
+                                    <TableCell>
+                                        <Button size="xs" onClick={() => selectTechnician(tech)}>
+                                            Choose
+                                        </Button>
+                                    </TableCell>
+                                </tr>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </ModalBody>
+                <ModalFooter>
+                    <Button color="gray" onClick={() => setShowTechModal(false)}>
+                        Cancel
+                    </Button>
+                </ModalFooter>
+            </Modal>
         </div>
     );
 }
