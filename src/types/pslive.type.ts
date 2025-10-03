@@ -89,3 +89,5 @@ export type ScheduleLine = {
     totalmins: number;
     zipcode: number
 }
+
+export type DaysOfWeek = "SUN" | "MON" | "TUES" | "WED" | "THURS" | "FRI" | "SAT"

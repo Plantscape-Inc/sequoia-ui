@@ -7,6 +7,7 @@ export default function Home() {
         { label: "Addresses", path: "/psliveaddresses" },
         { label: "Products", path: "/psliveproducts" },
         { label: "Technicians", path: "/pslivetechnicians" },
+        { label: "Schedule", path: "/psliveschedule" },
     ];
 
     return (

@@ -13,8 +13,9 @@ import {
     ModalHeader,
     ModalBody,
     ModalFooter,
+    Select,
 } from "flowbite-react";
-import { ScheduleLine, Technician } from "../../../types/pslive.type";
+import { ScheduleLine, Technician, type DaysOfWeek } from "../../../types/pslive.type";
 
 export default function ScheduleEditor() {
     const API_URL = import.meta.env.VITE_PSLIVE_URL;
@@ -163,12 +164,27 @@ export default function ScheduleEditor() {
     };
 
     // Select technician for a line
+    // Select technician (for modal use)
     const selectTechnician = (tech: Technician) => {
-        if (!selectedLineId) return;
-        handleChange(selectedLineId, "technician", tech.techid);
+        if (selectedLineId) {
+            // case: updating a schedule line
+            handleChange(selectedLineId, "technician", tech.techid);
+        } else {
+            // case: selecting tech for top-level form
+            setTechId(tech.techid);
+            const newParams = new URLSearchParams(window.location.search);
+            newParams.set("techid", tech.techid);
+            window.history.replaceState(
+                {},
+                "",
+                `${window.location.pathname}?${newParams.toString()}`
+            );
+            fetchSchedule(tech.techid)
+        }
         setShowTechModal(false);
         setSelectedLineId(null);
     };
+
 
     return (
         <div>
@@ -185,23 +201,49 @@ export default function ScheduleEditor() {
                     <Label className="mb-2 block" htmlFor="techid">
                         Enter Technician ID
                     </Label>
-                    <TextInput
-                        id="techid"
-                        type="text"
-                        value={techId}
-                        onChange={(e) => {
-                            const newParams = new URLSearchParams(window.location.search);
-                            newParams.set("techid", e.target.value);
-                            window.history.replaceState({}, "", `${window.location.pathname}?${newParams.toString()}`);
-                            setTechId(e.target.value)
-                        }}
-                        required
-                    />
+                    <div className="flex gap-2">
+                        <TextInput
+
+                            id="techid"
+                            type="text"
+                            value={techId}
+                            onChange={(e) => {
+                                setSchedule([])
+                                const newParams = new URLSearchParams(window.location.search);
+                                newParams.set("techid", e.target.value);
+                                window.history.replaceState(
+                                    {},
+                                    "",
+                                    `${window.location.pathname}?${newParams.toString()}`
+                                );
+                                setTechId(e.target.value);
+                            }}
+                            required
+                            readOnly
+                            className="flex-1"
+                        />
+                        <Button type="button" onClick={() => {
+                            setShowTechModal(true);
+                            fetchTechnicians();
+                        }}>
+                            Select Technician
+                        </Button>
+
+                        {techId && (
+                            <Button type="button" onClick={() => {
+                                window.open(`${API_URL}/schedulepdf/${techId}`, "_blank");
+                            }}>
+                                Download PDF
+                            </Button>
+                        )}
+                    </div>
+
                 </div>
                 <Button type="submit" disabled={loading}>
                     {loading ? "Loading..." : "Fetch Schedule"}
                 </Button>
             </form>
+
 
             {loading && (
                 <div className="mt-6 flex justify-center">
@@ -233,26 +275,26 @@ export default function ScheduleEditor() {
                                 <tr key={line.id}>
                                     <TableCell>{line.id}</TableCell>
                                     <TableCell>
-                                        <div className="flex gap-2 items-center">
-                                            <TextInput
-                                                value={line.technician}
-                                                readOnly
-                                            />
-                                            <Button
-                                                size="xs"
-                                                onClick={() => openTechModal(line.id)}
-                                            >
-                                                Select
-                                            </Button>
-                                        </div>
+                                        <Button
+                                            size="xs"
+                                            onClick={() => openTechModal(line.id)}
+                                            className="w-full justify-start"
+                                        >
+                                            {line.technician || "Select Technician"}
+                                        </Button>
                                     </TableCell>
                                     <TableCell>
-                                        <TextInput
+                                        <Select
                                             value={line.day}
-                                            onChange={(e) =>
-                                                handleChange(line.id, "day", e.target.value)
-                                            }
-                                        />
+                                            onChange={(e) => handleChange(line.id, "day", e.target.value as DaysOfWeek
+                                            )}
+                                        >
+                                            {["SUN", "MON", "TUES", "WED", "THURS", "FRI", "SAT"].map((d) => (
+                                                <option key={d} value={d}>
+                                                    {d}
+                                                </option>
+                                            ))}
+                                        </Select>
                                     </TableCell>
                                     <TableCell>
                                         <TextInput
