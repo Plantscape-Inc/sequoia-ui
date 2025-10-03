@@ -236,11 +236,11 @@ export default function OrderEditor() {
                             </div>
 
                             <div className="flex min-w-[200px] flex-1 flex-col gap-4">
-                                <Label htmlFor="accoutlocid">Account Location ID</Label>
+                                <Label htmlFor="accountlocid">Account Location ID</Label>
                                 <TextInput
-                                    id="accoutlocid"
-                                    value={tempOrder.accoutlocid}
-                                    onChange={(e) => handleChange("accoutlocid", e.target.value)}
+                                    id="accountlocid"
+                                    value={tempOrder.accountlocid}
+                                    onChange={(e) => handleChange("accountlocid", e.target.value)}
                                 />
 
                                 <Label htmlFor="accountlocation">Account Location</Label>

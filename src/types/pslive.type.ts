@@ -22,7 +22,7 @@ export interface OrderLine {
 
 export interface Order {
     orderid: number;
-    accoutlocid: string;
+    accountlocid: string;
     accountlocation: number;
     contracttype: string;
     entrydate: string | null;

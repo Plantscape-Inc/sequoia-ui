@@ -15,7 +15,19 @@ import {
     ModalFooter,
     Select,
 } from "flowbite-react";
-import { ScheduleLine, Technician, type DaysOfWeek } from "../../../types/pslive.type";
+import { ScheduleLine, Technician, type DaysOfWeek, type Order } from "../../../types/pslive.type";
+
+
+const dayOrder: Record<string, number> = {
+    "SUN": 0,
+    "MON": 1,
+    "TUES": 2,
+    "WED": 3,
+    "THURS": 4,
+    "FRI": 5,
+    "SAT": 6,
+};
+
 
 export default function ScheduleEditor() {
     const API_URL = import.meta.env.VITE_PSLIVE_URL;
@@ -24,21 +36,34 @@ export default function ScheduleEditor() {
     const [loading, setLoading] = useState(false);
     const [schedule, setSchedule] = useState<ScheduleLine[]>([]);
 
-    // For Technician Modal
+    // Technician Modal
     const [showTechModal, setShowTechModal] = useState(false);
     const [technicians, setTechnicians] = useState<Technician[]>([]);
     const [selectedLineId, setSelectedLineId] = useState<number | null>(null);
 
+    // Order Modal
+    const [showOrderModal, setShowOrderModal] = useState(false);
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [selectedOrderLineId, setSelectedOrderLineId] = useState<number | null>(null);
+
     const params = new URLSearchParams(window.location.search);
     useEffect(() => {
-
         const techparam = params.get("techid");
-
         if (techparam) {
             setTechId(techparam);
             fetchSchedule(techparam);
         }
     }, []);
+
+    function sortSchedule(schedule: ScheduleLine[]) {
+
+        return schedule.sort((a, b) => {
+            const dayA = dayOrder[a.day as keyof typeof dayOrder] ?? 99;
+            const dayB = dayOrder[b.day as keyof typeof dayOrder] ?? 99;
+            return dayA - dayB;
+        })
+
+    }
 
     async function fetchSchedule(id: string) {
         if (!id) return;
@@ -47,10 +72,9 @@ export default function ScheduleEditor() {
             const response = await fetch(`${API_URL}/schedule/${id}`);
             if (!response.ok) {
                 throw (await response.json());
-                // console.error(await response.json())
             }
-
             const data: ScheduleLine[] = await response.json();
+
             setSchedule(data);
         } catch (err) {
             console.error(err);
@@ -72,6 +96,20 @@ export default function ScheduleEditor() {
         }
     }
 
+    async function fetchOrders() {
+        try {
+            const response = await fetch(`${API_URL}/orders`);
+            if (!response.ok) throw new Error("Failed to fetch orders");
+            const data: Order[] = await response.json();
+
+
+            setOrders(data);
+        } catch (err) {
+            console.error(err);
+            alert("Error fetching orders");
+        }
+    }
+
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         fetchSchedule(techId);
@@ -88,6 +126,79 @@ export default function ScheduleEditor() {
             )
         );
     };
+
+    const handleDelete = async (id: number) => {
+        if (!confirm("Delete this schedule line?")) return;
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_URL}/schedule/${id}`, {
+                method: "DELETE",
+            });
+            if (!response.ok) throw new Error("Failed to delete schedule");
+
+            alert("Schedule deleted!");
+            setSchedule((prev) => prev.filter((line) => line.id !== id));
+        } catch (err) {
+            console.error(err);
+            alert("Delete failed");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const addScheduleLine = async () => {
+        const newLine: Omit<ScheduleLine, "account" | "totalmins" | "zipcode"> = {
+            id: Math.floor(Math.random() * 10000) + 1,
+            technician: techId,
+            day: "MON",
+            orderid: 0,
+        };
+
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_URL}/schedule`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newLine),
+            });
+            if (!response.ok) throw new Error("Failed to add schedule");
+            await fetchSchedule(techId);
+        } catch (err) {
+            console.error(err);
+            alert("Add failed");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Technician modal handlers
+    const openTechModal = (lineId: number) => {
+        setSelectedLineId(lineId);
+        setShowTechModal(true);
+        fetchTechnicians();
+    };
+
+    const selectTechnician = (tech: Technician) => {
+        if (selectedLineId) {
+            handleChange(selectedLineId, "technician", tech.techid);
+        } else {
+            setTechId(tech.techid);
+            const newParams = new URLSearchParams(window.location.search);
+            newParams.set("techid", tech.techid);
+            window.history.replaceState({}, "", `${window.location.pathname}?${newParams.toString()}`);
+            fetchSchedule(tech.techid);
+        }
+        setShowTechModal(false);
+        setSelectedLineId(null);
+    };
+
+    // Order modal handlers
+    const openOrderModal = (lineId: number) => {
+        setSelectedOrderLineId(lineId);
+        setShowOrderModal(true);
+        fetchOrders();
+    };
+
 
     const handleUpdate = async (line: ScheduleLine) => {
         setLoading(true);
@@ -109,82 +220,28 @@ export default function ScheduleEditor() {
         }
     };
 
-    const handleDelete = async (id: number) => {
-        if (!confirm("Delete this schedule line?")) return;
-        setLoading(true);
-        try {
-            const response = await fetch(`${API_URL}/schedule/${id}`, {
-                method: "DELETE",
+    const selectOrder = (order: Order) => {
+        console.log("selectOrder")
+        if (selectedOrderLineId) {
+            setSchedule((prev) => {
+                console.log("prev")
+                const updated = prev.map((line) =>
+                    line.id === selectedOrderLineId ? { ...line, orderid: order.orderid } : line
+                );
+
+                const updatedLine = updated.find((line) => line.id === selectedOrderLineId);
+                if (updatedLine) {
+                    console.log("here")
+                    handleUpdate(updatedLine);
+                }
+
+                return updated;
             });
-
-            if (!response.ok) throw new Error("Failed to delete schedule");
-
-            alert("Schedule deleted!");
-            setSchedule((prev) => prev.filter((line) => line.id !== id));
-        } catch (err) {
-            console.error(err);
-            alert("Delete failed");
-        } finally {
-            setLoading(false);
         }
+        setShowOrderModal(false);
+        setSelectedOrderLineId(null);
+        fetchOrders();
     };
-
-    const addScheduleLine = async () => {
-        const newLine: Omit<ScheduleLine, "account" | "totalmins" | "zipcode"> = {
-            id: Math.floor(Math.random() * 10000) + 1,
-            technician: techId,
-            day: "MON",
-            orderid: 3354,
-        };
-
-        setLoading(true);
-        try {
-            const response = await fetch(`${API_URL}/schedule`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newLine),
-            });
-
-            if (!response.ok) throw new Error("Failed to add schedule");
-
-            await fetchSchedule(techId);
-        } catch (err) {
-            console.error(err);
-            alert("Add failed");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Open technician modal for a given line
-    const openTechModal = (lineId: number) => {
-        setSelectedLineId(lineId);
-        setShowTechModal(true);
-        fetchTechnicians();
-    };
-
-    // Select technician for a line
-    // Select technician (for modal use)
-    const selectTechnician = (tech: Technician) => {
-        if (selectedLineId) {
-            // case: updating a schedule line
-            handleChange(selectedLineId, "technician", tech.techid);
-        } else {
-            // case: selecting tech for top-level form
-            setTechId(tech.techid);
-            const newParams = new URLSearchParams(window.location.search);
-            newParams.set("techid", tech.techid);
-            window.history.replaceState(
-                {},
-                "",
-                `${window.location.pathname}?${newParams.toString()}`
-            );
-            fetchSchedule(tech.techid)
-        }
-        setShowTechModal(false);
-        setSelectedLineId(null);
-    };
-
 
     return (
         <div>
@@ -193,57 +250,53 @@ export default function ScheduleEditor() {
             </h1>
 
             {/* Fetch Schedule Form */}
-            <form
-                className="mx-auto mt-6 flex max-w-md flex-col gap-4"
-                onSubmit={handleSubmit}
-            >
+            <form className="mx-auto mt-6 flex max-w-md flex-col gap-4" onSubmit={handleSubmit}>
                 <div>
                     <Label className="mb-2 block" htmlFor="techid">
                         Enter Technician ID
                     </Label>
                     <div className="flex gap-2">
                         <TextInput
-
                             id="techid"
                             type="text"
                             value={techId}
                             onChange={(e) => {
-                                setSchedule([])
+                                setSchedule([]);
                                 const newParams = new URLSearchParams(window.location.search);
                                 newParams.set("techid", e.target.value);
-                                window.history.replaceState(
-                                    {},
-                                    "",
-                                    `${window.location.pathname}?${newParams.toString()}`
-                                );
+                                window.history.replaceState({}, "", `${window.location.pathname}?${newParams.toString()}`);
                                 setTechId(e.target.value);
                             }}
                             required
                             readOnly
                             className="flex-1"
                         />
-                        <Button type="button" onClick={() => {
-                            setShowTechModal(true);
-                            fetchTechnicians();
-                        }}>
+                        <Button
+                            type="button"
+                            onClick={() => {
+                                setShowTechModal(true);
+                                fetchTechnicians();
+                            }}
+                        >
                             Select Technician
                         </Button>
 
                         {techId && (
-                            <Button type="button" onClick={() => {
-                                window.open(`${API_URL}/schedulepdf/${techId}`, "_blank");
-                            }}>
+                            <Button
+                                type="button"
+                                onClick={() => {
+                                    window.open(`${API_URL}/schedulepdf/${techId}`, "_blank");
+                                }}
+                            >
                                 Download PDF
                             </Button>
                         )}
                     </div>
-
                 </div>
                 <Button type="submit" disabled={loading}>
                     {loading ? "Loading..." : "Fetch Schedule"}
                 </Button>
             </form>
-
 
             {loading && (
                 <div className="mt-6 flex justify-center">
@@ -265,14 +318,15 @@ export default function ScheduleEditor() {
                             <TableHeadCell>ID</TableHeadCell>
                             <TableHeadCell>Technician</TableHeadCell>
                             <TableHeadCell>Day</TableHeadCell>
+                            <TableHeadCell>Order</TableHeadCell>
                             <TableHeadCell>Account</TableHeadCell>
                             <TableHeadCell>Total Minutes</TableHeadCell>
                             <TableHeadCell>Zipcode</TableHeadCell>
                             <TableHeadCell>Actions</TableHeadCell>
                         </TableHead>
                         <TableBody className="divide-y">
-                            {schedule.map((line) => (
-                                <tr key={line.id}>
+                            {sortSchedule(schedule).map((line) => (
+                                <tr id={String(line.id)} key={line.id}>
                                     <TableCell>{line.id}</TableCell>
                                     <TableCell>
                                         <Button
@@ -286,8 +340,9 @@ export default function ScheduleEditor() {
                                     <TableCell>
                                         <Select
                                             value={line.day}
-                                            onChange={(e) => handleChange(line.id, "day", e.target.value as DaysOfWeek
-                                            )}
+                                            onChange={(e) =>
+                                                handleChange(line.id, "day", e.target.value as DaysOfWeek)
+                                            }
                                         >
                                             {["SUN", "MON", "TUES", "WED", "THURS", "FRI", "SAT"].map((d) => (
                                                 <option key={d} value={d}>
@@ -297,35 +352,28 @@ export default function ScheduleEditor() {
                                         </Select>
                                     </TableCell>
                                     <TableCell>
-                                        <TextInput
-                                            type="string"
-                                            value={line.account}
-                                            readOnly
-                                        />
+                                        <Button
+                                            size="xs"
+                                            onClick={() => openOrderModal(line.id)}
+                                            className="w-full justify-start"
+                                        >
+                                            {line.orderid || "Select Order"}
+                                        </Button>
                                     </TableCell>
                                     <TableCell>
-                                        <TextInput
-                                            type="number"
-                                            value={line.totalmins}
-                                            readOnly
-                                        />
+                                        <TextInput type="string" value={line.account} readOnly />
                                     </TableCell>
                                     <TableCell>
-                                        <TextInput
-                                            type="number"
-                                            value={line.zipcode}
-                                            readOnly
-                                        />
+                                        <TextInput type="number" value={line.totalmins} readOnly />
+                                    </TableCell>
+                                    <TableCell>
+                                        <TextInput type="number" value={line.zipcode} readOnly />
                                     </TableCell>
                                     <TableCell className="flex gap-2">
                                         <Button size="xs" onClick={() => handleUpdate(line)}>
                                             Save
                                         </Button>
-                                        <Button
-                                            size="xs"
-                                            color="failure"
-                                            onClick={() => handleDelete(line.id)}
-                                        >
+                                        <Button size="xs" color="failure" onClick={() => handleDelete(line.id)}>
                                             Delete
                                         </Button>
                                     </TableCell>
@@ -365,6 +413,38 @@ export default function ScheduleEditor() {
                 </ModalBody>
                 <ModalFooter>
                     <Button color="gray" onClick={() => setShowTechModal(false)}>
+                        Cancel
+                    </Button>
+                </ModalFooter>
+            </Modal>
+
+            {/* Order Selection Modal */}
+            <Modal show={showOrderModal} size="4xl" onClose={() => setShowOrderModal(false)}>
+                <ModalHeader>Select Order</ModalHeader>
+                <ModalBody>
+                    <Table hoverable>
+                        <TableHead>
+                            <TableHeadCell>ID</TableHeadCell>
+                            <TableHeadCell>Name</TableHeadCell>
+                            <TableHeadCell>Select</TableHeadCell>
+                        </TableHead>
+                        <TableBody>
+                            {orders.map((order) => (
+                                <tr key={order.orderid}>
+                                    <TableCell>{order.orderid}</TableCell>
+                                    <TableCell>{order.accountlocid}</TableCell>
+                                    <TableCell>
+                                        <Button size="xs" onClick={() => selectOrder(order)}>
+                                            Choose
+                                        </Button>
+                                    </TableCell>
+                                </tr>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </ModalBody>
+                <ModalFooter>
+                    <Button color="gray" onClick={() => setShowOrderModal(false)}>
                         Cancel
                     </Button>
                 </ModalFooter>

@@ -132,7 +132,7 @@ export default function Orders() {
                                     >
                                         {order.orderid}
                                     </TableCell>
-                                    <TableCell>{order.accoutlocid}</TableCell>
+                                    <TableCell>{order.accountlocid}</TableCell>
                                     <TableCell>{order.contracttype}</TableCell>
                                     <TableCell>
                                         {order.entrydate
