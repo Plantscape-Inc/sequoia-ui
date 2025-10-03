@@ -4,9 +4,18 @@ import {
     Label,
     Spinner,
     TextInput,
+    Modal,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
+    Table,
+    TableHead,
+    TableHeadCell,
+    TableBody,
+    TableCell,
 } from "flowbite-react";
 import { Account, type Address } from "../../../types/pslive.type";
-import AccountLocationDisplay from './PsLiveAccountLocationDisplay'
+import AccountLocationDisplay from "./PsLiveAccountLocationDisplay";
 
 export default function AccountEditor() {
     const API_URL = import.meta.env.VITE_PSLIVE_URL;
@@ -17,8 +26,13 @@ export default function AccountEditor() {
     const [account, setAccount] = useState<Account | null>(null);
     const [tempAccount, setTempAccount] = useState<Account | null>(null);
 
-    const [, setAddress] = useState<Address | null>(null)
-    const [, setBillToAddress] = useState<Address | null>(null)
+    const [address, setAddress] = useState<Address | null>(null);
+    const [billToAddress, setBillToAddress] = useState<Address | null>(null);
+
+    // Address modal
+    const [showAddressModal, setShowAddressModal] = useState(false);
+    const [addressList, setAddressList] = useState<Address[]>([]);
+    const [addressFieldTarget, setAddressFieldTarget] = useState<"address" | "billtoaddress" | null>(null);
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
@@ -30,28 +44,24 @@ export default function AccountEditor() {
         }
     }, []);
 
-     
     async function updateAccount(newAccountId: string) {
         if (!newAccountId) return;
 
         setLoading(true);
         try {
             const data: Account = await (await fetch(`${API_URL}/account/${newAccountId}`)).json();
-            console.log(data)
             setAccount(data);
             setTempAccount(data);
 
-            const addressResponse = await (await fetch(`${API_URL}/address/${data.address}`)).json()
-            setAddress(addressResponse)
+            const addressResponse = await (await fetch(`${API_URL}/address/${data.address}`)).json();
+            setAddress(addressResponse);
 
             if (data.billtoaddress === data.address) {
-                setBillToAddress(addressResponse)
+                setBillToAddress(addressResponse);
             } else {
-                const billToAddressResponse = await (await fetch(`${API_URL}/address/${data.billtoaddress}`)).json()
-                setBillToAddress(billToAddressResponse)
+                const billToAddressResponse = await (await fetch(`${API_URL}/address/${data.billtoaddress}`)).json();
+                setBillToAddress(billToAddressResponse);
             }
-
-
         } finally {
             setLoading(false);
         }
@@ -62,8 +72,9 @@ export default function AccountEditor() {
         setTempAccount({ ...tempAccount, [field]: value } as Account);
     };
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    const handleSubmit = async (e?: React.FormEvent<HTMLFormElement>) => {
+        if (e)
+            e.preventDefault();
 
         if (!accountId) {
             alert("Please enter an Account ID");
@@ -81,6 +92,7 @@ export default function AccountEditor() {
             if (!response.ok) throw new Error("Failed to update account");
 
             await updateAccount(accountId);
+            alert("Account Updated")
         } catch (err) {
             console.error(err);
             alert("Something went wrong while saving the account.");
@@ -88,6 +100,26 @@ export default function AccountEditor() {
             setLoading(false);
         }
     };
+
+
+    // useEffect(() => {
+
+    //     handleSubmit()
+
+    // }, [])
+
+
+    async function fetchAddresses() {
+        try {
+            const response = await fetch(`${API_URL}/addresses`);
+            if (!response.ok) throw new Error("Failed to fetch addresses");
+            const data: Address[] = await response.json();
+            setAddressList(data);
+        } catch (err) {
+            console.error(err);
+            alert("Error fetching addresses");
+        }
+    }
 
     return (
         <div>
@@ -132,10 +164,7 @@ export default function AccountEditor() {
 
             {account && tempAccount && (
                 <div className="mx-auto max-w-4xl mt-8">
-                    <form
-                        className="flex flex-wrap gap-4"
-                        onSubmit={handleSubmit}
-                    >
+                    <form className="flex flex-wrap gap-4" onSubmit={handleSubmit}>
                         <div className="flex min-w-[200px] flex-1 flex-col gap-4">
                             <Label htmlFor="chemicalinfo">Chemical Info</Label>
                             <TextInput
@@ -168,46 +197,40 @@ export default function AccountEditor() {
                                 onChange={(e) => handleChange("date", e.target.value)}
                             />
 
-                            <Label htmlFor="address">Address ID</Label>
-                            <TextInput
-                                id="address"
-                                type="number"
-                                value={tempAccount.address}
-                                onChange={(e) => handleChange("address", Number(e.target.value))}
-                            />
+                            <Label htmlFor="address">Physical Address</Label>
+                            <div className="flex gap-2">
+                                {/* <TextInput id="address" type="number" value={address ? `${address.name1} ${address.address1 || "asdf"}` : "asdf"} readOnly /> */}
+                                <Button
+                                    size="xs"
+                                    onClick={() => {
+                                        setAddressFieldTarget("address");
+                                        setShowAddressModal(true);
+                                        fetchAddresses();
+                                    }}
+                                >
+                                    {address ? address.name1 : "null"}
+                                </Button>
+                            </div>
 
-                            <Label htmlFor="billtoaddress">Bill To Address ID</Label>
-                            <TextInput
-                                id="billtoaddress"
-                                type="number"
-                                value={tempAccount.billtoaddress}
-                                onChange={(e) =>
-                                    handleChange("billtoaddress", Number(e.target.value))
-                                }
-                            />
+                            <Label htmlFor="billtoaddress">Bill To Address</Label>
+                            <div className="flex gap-2">
+                                <Button
+                                    size="xs"
+                                    onClick={() => {
+                                        setAddressFieldTarget("billtoaddress");
+                                        setShowAddressModal(true);
+                                        fetchAddresses();
+                                    }}
+                                >
+                                    {billToAddress ? billToAddress.name1 : "null"}
+                                </Button>
+                            </div>
                         </div>
-
 
                         <div className="mt-4 w-full">
                             <Button type="submit">Update Account</Button>
                         </div>
                     </form>
-
-                    {/* <div className="m-8 mx-auto flex max-w-4xl flex-col justify-center gap-8 md:flex-row">
-                        <div className="flex-1">
-                            <h3 className="mb-2 text-center text-2xl font-bold text-gray-900 dark:text-gray-200">
-                                Billing Address
-                            </h3>
-                            <AddressDisplay address={billToAddress} />
-                        </div>
-
-                        <div className="flex-1">
-                            <h3 className="mb-2 text-center text-2xl font-bold text-gray-900 dark:text-gray-200">
-                                Shipping Address
-                            </h3>
-                            <AddressDisplay address={address} />
-                        </div>
-                    </div> */}
 
                     <div className="m-8">
                         <div className="flex justify-between items-center mb-4">
@@ -217,13 +240,11 @@ export default function AccountEditor() {
                             <Button
                                 color="blue"
                                 onClick={async () => {
-                                    const API_URL = import.meta.env.VITE_PSLIVE_URL;
-
                                     const newLocation = {
                                         id: Math.floor(Math.random() * 10000) + 1,
                                         accountid: account.accountid,
                                         location: "New Location",
-                                        locationcode: "NewCode", // or let backend assign
+                                        locationcode: "NewCode",
                                         locationitems: [],
                                     };
 
@@ -242,7 +263,7 @@ export default function AccountEditor() {
                                         }
 
                                         alert("Account location created successfully");
-                                        window.location.reload(); // refresh to show new location
+                                        window.location.reload();
                                     } catch (error) {
                                         console.error("Error creating location:", error);
                                         alert(`Error creating location: ${error}`);
@@ -254,15 +275,70 @@ export default function AccountEditor() {
                         </div>
 
                         {account.locations.map((location) => (
-                            <AccountLocationDisplay
-                                key={location.locationcode}
-                                location={location}
-                            />
+                            <AccountLocationDisplay key={location.locationcode} location={location} />
                         ))}
                     </div>
                 </div>
-            )
-            }
-        </div >
+            )}
+
+            {/* Address Selection Modal */}
+            <Modal show={showAddressModal} size="5xl" onClose={() => setShowAddressModal(false)}>
+                <ModalHeader>Select Address</ModalHeader>
+                <ModalBody>
+                    <Table hoverable>
+                        <TableHead>
+                            <TableHeadCell>ID</TableHeadCell>
+                            <TableHeadCell>Name</TableHeadCell>
+                            <TableHeadCell>City</TableHeadCell>
+                            <TableHeadCell>State</TableHeadCell>
+                            <TableHeadCell>Zip</TableHeadCell>
+                            <TableHeadCell>Select</TableHeadCell>
+                        </TableHead>
+                        <TableBody>
+                            {addressList.map((addr) => (
+                                <tr key={addr.id}>
+                                    <TableCell>{addr.id}</TableCell>
+                                    <TableCell>{addr.name1}</TableCell>
+                                    <TableCell>{addr.city}</TableCell>
+                                    <TableCell>{addr.state}</TableCell>
+                                    <TableCell>{addr.zip}</TableCell>
+                                    <TableCell>
+                                        <Button
+                                            size="xs"
+                                            onClick={async () => {
+                                                if (!tempAccount || !addressFieldTarget) return;
+
+                                                // Update tempAccount
+                                                handleChange(addressFieldTarget, addr.id);
+
+                                                // Update display state
+                                                if (addressFieldTarget === "address") {
+                                                    setAddress(addr);
+                                                    tempAccount.address = addr.id
+                                                } else if (addressFieldTarget === "billtoaddress") {
+                                                    setBillToAddress(addr);
+                                                    tempAccount.billtoaddress = addr.id
+                                                }
+                                                setShowAddressModal(false);
+                                                setAddressFieldTarget(null);
+                                                await handleSubmit();
+                                            }}
+                                        >
+                                            Choose
+                                        </Button>
+
+                                    </TableCell>
+                                </tr>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </ModalBody>
+                <ModalFooter>
+                    <Button color="gray" onClick={() => setShowAddressModal(false)}>
+                        Cancel
+                    </Button>
+                </ModalFooter>
+            </Modal>
+        </div>
     );
 }
