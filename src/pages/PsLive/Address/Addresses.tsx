@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
     Spinner,
     Table,
@@ -21,6 +22,7 @@ import { Address } from "../../../types/pslive.type";
 
 export default function Addresses() {
     const API_URL = import.meta.env.VITE_PSLIVE_URL;
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const [loading, setLoading] = useState(false);
     const [addressesData, setAddressesData] = useState<Address[] | null>(null);
@@ -28,7 +30,6 @@ export default function Addresses() {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
-
     const [editingAddress, setEditingAddress] = useState<Address | null>(null);
 
     const blankAddress: Address = {
@@ -45,7 +46,7 @@ export default function Addresses() {
         phone: "",
         extension: "",
         fax: "",
-    }
+    };
 
     const [formData, setFormData] = useState<Address>(blankAddress);
 
@@ -58,6 +59,18 @@ export default function Addresses() {
             .then(setAddressesData)
             .finally(() => setLoading(false));
     }, [addressesData, API_URL]);
+
+    // Auto-open modal if URL has addressid
+    useEffect(() => {
+        if (!addressesData) return;
+        const idParam = searchParams.get("addressid");
+        if (!idParam) return;
+
+        const addr = addressesData.find(a => a.id.toString() === idParam);
+        if (addr) {
+            handleRowClick(addr);
+        }
+    }, [searchParams, addressesData]);
 
     // Handle form input changes
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,7 +107,7 @@ export default function Addresses() {
             setEditingAddress(null);
 
             setTimeout(() => {
-                setShowModal(false);
+                handleCloseModal();
                 setSuccess(false);
             }, 1500);
         } catch (err) {
@@ -109,6 +122,7 @@ export default function Addresses() {
         setEditingAddress(null);
         setFormData(blankAddress);
         setShowModal(true);
+        setSearchParams({ addressid: blankAddress.id.toString() });
     };
 
     // Open modal for editing
@@ -116,6 +130,8 @@ export default function Addresses() {
         setEditingAddress(address);
         setFormData(address);
         setShowModal(true);
+
+        setSearchParams({ addressid: address.id.toString() });
     };
 
     // Close modal and reset
@@ -125,6 +141,7 @@ export default function Addresses() {
         setSuccess(false);
         setEditingAddress(null);
         setFormData(blankAddress);
+        setSearchParams({}); // remove addressid from URL
     };
 
     // Handle delete
@@ -152,7 +169,7 @@ export default function Addresses() {
             }
 
             setAddressesData(null); // refresh list
-            setShowModal(false);
+            handleCloseModal();
         } catch (err) {
             setError(`An error occurred while deleting the address: ${err}`);
         } finally {
@@ -357,7 +374,6 @@ export default function Addresses() {
                     </div>
                 </ModalFooter>
             </Modal>
-
         </div>
     );
 }

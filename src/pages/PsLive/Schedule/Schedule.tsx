@@ -221,17 +221,14 @@ export default function ScheduleEditor() {
     };
 
     const selectOrder = (order: Order) => {
-        console.log("selectOrder")
         if (selectedOrderLineId) {
             setSchedule((prev) => {
-                console.log("prev")
                 const updated = prev.map((line) =>
                     line.id === selectedOrderLineId ? { ...line, orderid: order.orderid } : line
                 );
 
                 const updatedLine = updated.find((line) => line.id === selectedOrderLineId);
                 if (updatedLine) {
-                    console.log("here")
                     handleUpdate(updatedLine);
                 }
 

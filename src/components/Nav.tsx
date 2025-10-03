@@ -13,7 +13,7 @@ type NavItems = {
 
 const sideNavOptions: NavItems = {
     Home: "/",
-    Account: "/account",
+    // Account: "/account",
     "Product Analysis": "/productAnalysis",
     //   Epicor: {
     //     Orders: "/orders",

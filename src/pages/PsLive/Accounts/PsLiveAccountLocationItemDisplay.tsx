@@ -56,7 +56,6 @@ export default function AccountLocationItemDisplay({ item }: EditableAccountLoca
 
 
     const deleteItem = async () => {
-        console.log(item)
         try {
             const response = await fetch(
                 `${API_URL}/accountlocation/${item.id}/${item.locationcode}/item/${item.productcode}`,

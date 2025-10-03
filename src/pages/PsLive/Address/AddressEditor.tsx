@@ -65,7 +65,7 @@ export default function AddressDisplay() {
             setAddress(data.address);
             setLocalAddress({ ...data.address });
         } catch (err) {
-            console.log((err as Error));
+            console.error((err as Error));
         } finally {
             setLoading(false);
         }

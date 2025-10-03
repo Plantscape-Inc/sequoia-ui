@@ -96,7 +96,6 @@ export default function AccountLocationDisplay({
         }
 
         newItem.id = Math.floor(Math.random() * 10000) + 1
-        console.log(newItem)
 
         try {
             const response = await fetch(
