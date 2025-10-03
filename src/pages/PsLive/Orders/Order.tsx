@@ -157,119 +157,120 @@ export default function OrderEditor() {
             </div>
 
             {
-        order && tempOrder && (
-            <div className="mx-auto mt-8 max-w-4xl">
-                {/* Addresses */}
-                <div className="flex gap-8">
-                    <div className="flex-1">
-                        <Label>Billing Address</Label>
-                        <Button
-                            size="sm"
-                            onClick={() => {
-                                setAddressFieldTarget("billing");
-                                setShowAddressModal(true);
-                                fetchAddresses();
-                            }}
-                        >
-                            {billingAddress ? billingAddress.name1 : "Select"}
-                        </Button>
-                    </div>
-                    <div className="flex-1">
-                        <Label>Shipping Address</Label>
-                        <Button
-                            size="sm"
-                            onClick={() => {
-                                setAddressFieldTarget("shipping");
-                                setShowAddressModal(true);
-                                fetchAddresses();
-                            }}
-                        >
-                            {shippingAddress ? shippingAddress.name1 : "Select"}
-                        </Button>
-                    </div>
-                </div>
-
-                {/* Update Order */}
-                <div className="mt-4">
-                    <Button onClick={handleUpdate} disabled={loading}>
-                        {loading ? "Updating..." : "Update Order"}
-                    </Button>
-                    <Button className="ml-2" onClick={addOrderLine}>
-                        Add Order Line
-                    </Button>
-                </div>
-
-                {/* Order Lines Table */}
-                <Table hoverable className="mt-6">
-                    <TableHead>
-                        <TableHeadCell>ID</TableHeadCell>
-                        <TableHeadCell>Order ID</TableHeadCell>
-                        <TableHeadCell>Product</TableHeadCell>
-                        <TableHeadCell>Delete</TableHeadCell>
-                    </TableHead>
-                    <TableBody>
-                        {order.lines.map((line) => (
-                            <OrderLineDisplay key={line.id} line={line} />
-                        ))}
-                    </TableBody>
-                </Table>
-            </div>
-        )
-    }
-
-    {/* Address Modal */ }
-    <Modal show={showAddressModal} size="5xl" onClose={() => setShowAddressModal(false)}>
-        <ModalHeader>Select Address</ModalHeader>
-        <ModalBody>
-            <Table hoverable>
-                <TableHead>
-                    <TableHeadCell>ID</TableHeadCell>
-                    <TableHeadCell>Name</TableHeadCell>
-                    <TableHeadCell>City</TableHeadCell>
-                    <TableHeadCell>State</TableHeadCell>
-                    <TableHeadCell>Zip</TableHeadCell>
-                    <TableHeadCell>Select</TableHeadCell>
-                </TableHead>
-                <TableBody>
-                    {addressList.map((addr) => (
-                        <tr key={addr.id}>
-                            <TableCell>{addr.id}</TableCell>
-                            <TableCell>{addr.name1}</TableCell>
-                            <TableCell>{addr.city}</TableCell>
-                            <TableCell>{addr.state}</TableCell>
-                            <TableCell>{addr.zip}</TableCell>
-                            <TableCell>
+                order && tempOrder && (
+                    <div className="mx-auto mt-8 max-w-4xl">
+                        {/* Addresses */}
+                        <div className="flex gap-8">
+                            <div className="flex-1">
+                                <Label>Billing Address</Label>
                                 <Button
-                                    size="xs"
+                                    size="sm"
                                     onClick={() => {
-                                        if (!tempOrder || !addressFieldTarget) return;
-
-                                        if (addressFieldTarget === "billing") {
-                                            tempOrder.billing_address = addr;
-                                            setBillingAddress(addr);
-                                        } else {
-                                            tempOrder.shipping_address = addr;
-                                            setShippingAddress(addr);
-                                        }
-
-                                        setShowAddressModal(false);
-                                        setAddressFieldTarget(null);
+                                        setAddressFieldTarget("billing");
+                                        setShowAddressModal(true);
+                                        fetchAddresses();
                                     }}
                                 >
-                                    Choose
+                                    {billingAddress ? billingAddress.name1 : "Select"}
                                 </Button>
-                            </TableCell>
-                        </tr>
-                    ))}
-                </TableBody>
-            </Table>
-        </ModalBody>
-        <ModalFooter>
-            <Button color="gray" onClick={() => setShowAddressModal(false)}>
-                Cancel
-            </Button>
-        </ModalFooter>
-    </Modal>
+                            </div>
+                            <div className="flex-1">
+                                <Label>Shipping Address</Label>
+                                <Button
+                                    size="sm"
+                                    onClick={() => {
+                                        setAddressFieldTarget("shipping");
+                                        setShowAddressModal(true);
+                                        fetchAddresses();
+                                    }}
+                                >
+                                    {shippingAddress ? shippingAddress.name1 : "Select"}
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Update Order */}
+                        <div className="mt-4 flex">
+                            <Button onClick={handleUpdate} disabled={loading}>
+                                {loading ? "Updating..." : "Update Order"}
+                            </Button>
+                            <Button className="ml-2" onClick={addOrderLine}>
+                                Add Order Line
+                            </Button>
+                        </div>
+
+                        {/* Order Lines Table */}
+                        <Table hoverable className="mt-6">
+                            <TableHead>
+                                <TableHeadCell></TableHeadCell>
+                                <TableHeadCell></TableHeadCell>
+                                <TableHeadCell>ID</TableHeadCell>
+                                <TableHeadCell>Order ID</TableHeadCell>
+                                <TableHeadCell>Product</TableHeadCell>
+                            </TableHead>
+                            <TableBody>
+                                {order.lines.map((line) => (
+                                    <OrderLineDisplay key={line.id} line={line} />
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                )
+            }
+
+            {/* Address Modal */}
+            <Modal show={showAddressModal} size="5xl" onClose={() => setShowAddressModal(false)}>
+                <ModalHeader>Select Address</ModalHeader>
+                <ModalBody>
+                    <Table hoverable>
+                        <TableHead>
+                            <TableHeadCell>ID</TableHeadCell>
+                            <TableHeadCell>Name</TableHeadCell>
+                            <TableHeadCell>City</TableHeadCell>
+                            <TableHeadCell>State</TableHeadCell>
+                            <TableHeadCell>Zip</TableHeadCell>
+                            <TableHeadCell>Select</TableHeadCell>
+                        </TableHead>
+                        <TableBody>
+                            {addressList.map((addr) => (
+                                <tr key={addr.id}>
+                                    <TableCell>{addr.id}</TableCell>
+                                    <TableCell>{addr.name1}</TableCell>
+                                    <TableCell>{addr.city}</TableCell>
+                                    <TableCell>{addr.state}</TableCell>
+                                    <TableCell>{addr.zip}</TableCell>
+                                    <TableCell>
+                                        <Button
+                                            size="xs"
+                                            onClick={() => {
+                                                if (!tempOrder || !addressFieldTarget) return;
+
+                                                if (addressFieldTarget === "billing") {
+                                                    tempOrder.billing_address = addr;
+                                                    setBillingAddress(addr);
+                                                } else {
+                                                    tempOrder.shipping_address = addr;
+                                                    setShippingAddress(addr);
+                                                }
+
+                                                setShowAddressModal(false);
+                                                setAddressFieldTarget(null);
+                                            }}
+                                        >
+                                            Choose
+                                        </Button>
+                                    </TableCell>
+                                </tr>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </ModalBody>
+                <ModalFooter>
+                    <Button color="gray" onClick={() => setShowAddressModal(false)}>
+                        Cancel
+                    </Button>
+                </ModalFooter>
+            </Modal>
         </div >
     );
 }
