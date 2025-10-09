@@ -40,7 +40,6 @@ export default function OrderLine({ line }: EditableOrderLineRowProps) {
     useEffect(() => {
         async function doSearch() {
             const results = await searchProducts(searchTerm, products);
-            console.log(results.length)
             setFilteredProducts(results);
         }
         doSearch();

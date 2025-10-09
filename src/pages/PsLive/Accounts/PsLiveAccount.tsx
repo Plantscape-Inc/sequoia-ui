@@ -53,16 +53,17 @@ export default function AccountEditor() {
             setAccount(data);
             setTempAccount(data);
 
-            console.log(data)
+            if (data) {
 
-            const addressResponse = await (await fetch(`${API_URL}/address/${data.address}`)).json();
-            setAddress(addressResponse);
+                const addressResponse = await (await fetch(`${API_URL}/address/${data.address}`)).json();
+                setAddress(addressResponse);
 
-            if (data.billtoaddress === data.address) {
-                setBillToAddress(addressResponse);
-            } else {
-                const billToAddressResponse = await (await fetch(`${API_URL}/address/${data.billtoaddress}`)).json();
-                setBillToAddress(billToAddressResponse);
+                if (data.billtoaddress === data.address) {
+                    setBillToAddress(addressResponse);
+                } else {
+                    const billToAddressResponse = await (await fetch(`${API_URL}/address/${data.billtoaddress}`)).json();
+                    setBillToAddress(billToAddressResponse);
+                }
             }
         } finally {
             setLoading(false);

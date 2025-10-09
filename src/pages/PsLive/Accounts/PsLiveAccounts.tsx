@@ -15,7 +15,7 @@ import {
     ModalBody,
     ModalHeader,
 } from "flowbite-react";
-import { Account } from "../../../types/pslive.type";
+import { Account, Address } from "../../../types/pslive.type";
 import { useNavigate } from "react-router-dom";
 
 export default function Accounts() {
@@ -38,6 +38,13 @@ export default function Accounts() {
         locations: [],
     });
 
+    // Address modal states
+    const [showAddressModal, setShowAddressModal] = useState(false);
+    const [addressList, setAddressList] = useState<Address[]>([]);
+    const [addressFieldTarget, setAddressFieldTarget] = useState<"address" | "billtoaddress" | null>(null);
+    const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+    const [selectedBillToAddress, setSelectedBillToAddress] = useState<Address | null>(null);
+
     useEffect(() => {
         if (accountsData) return;
         setLoading(true);
@@ -57,6 +64,18 @@ export default function Accounts() {
         }));
     };
 
+    async function fetchAddresses() {
+        try {
+            const response = await fetch(`${API_URL}/addresses`);
+            if (!response.ok) throw new Error("Failed to fetch addresses");
+            const data: Address[] = await response.json();
+            setAddressList(data);
+        } catch (err) {
+            console.error(err);
+            alert("Error fetching addresses");
+        }
+    }
+
     const handleCreateAccount = async () => {
         setLoading(true);
         try {
@@ -69,15 +88,24 @@ export default function Accounts() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.message || "Failed to create account");
 
-            console.log(data)
-
             setAccountsData((prev) =>
                 prev ? [data, ...prev] : [data]
             );
 
-            console.log(accountsData)
-
+            // Reset form
             setShowModal(false);
+            setNewAccount({
+                accountid: "",
+                address: 0,
+                billtoaddress: 0,
+                chemicalinfo: "",
+                waterinfo: "",
+                miscnotes: "",
+                date: new Date().toISOString(),
+                locations: [],
+            });
+            setSelectedAddress(null);
+            setSelectedBillToAddress(null);
         } catch (err) {
             console.error(err);
             alert("Failed to create account.");
@@ -137,25 +165,35 @@ export default function Accounts() {
                         </div>
 
                         <div>
-                            <Label htmlFor="address">Address ID</Label>
-                            <TextInput
-                                id="address"
-                                type="number"
-                                value={newAccount.address || 0}
-                                onChange={(e) => handleInputChange("address", e.target.value)}
-                            />
+                            <Label htmlFor="address">Physical Address</Label>
+                            <div className="flex gap-2">
+                                <Button
+                                    size="xs"
+                                    onClick={() => {
+                                        setAddressFieldTarget("address");
+                                        setShowAddressModal(true);
+                                        fetchAddresses();
+                                    }}
+                                >
+                                    {selectedAddress ? selectedAddress.name1 : "Select Address"}
+                                </Button>
+                            </div>
                         </div>
 
                         <div>
-                            <Label htmlFor="billtoaddress">Bill To Address ID</Label>
-                            <TextInput
-                                id="billtoaddress"
-                                type="number"
-                                value={newAccount.billtoaddress || 0}
-                                onChange={(e) =>
-                                    handleInputChange("billtoaddress", e.target.value)
-                                }
-                            />
+                            <Label htmlFor="billtoaddress">Bill To Address</Label>
+                            <div className="flex gap-2">
+                                <Button
+                                    size="xs"
+                                    onClick={() => {
+                                        setAddressFieldTarget("billtoaddress");
+                                        setShowAddressModal(true);
+                                        fetchAddresses();
+                                    }}
+                                >
+                                    {selectedBillToAddress ? selectedBillToAddress.name1 : "Select Address"}
+                                </Button>
+                            </div>
                         </div>
 
                         <div>
@@ -197,6 +235,61 @@ export default function Accounts() {
                 </ModalFooter>
             </Modal>
 
+            {/* Address Selection Modal */}
+            <Modal show={showAddressModal} size="5xl" onClose={() => setShowAddressModal(false)}>
+                <ModalHeader>Select Address</ModalHeader>
+                <ModalBody>
+                    <Table hoverable>
+                        <TableHead>
+                            <TableHeadCell>ID</TableHeadCell>
+                            <TableHeadCell>Name</TableHeadCell>
+                            <TableHeadCell>City</TableHeadCell>
+                            <TableHeadCell>State</TableHeadCell>
+                            <TableHeadCell>Zip</TableHeadCell>
+                            <TableHeadCell>Select</TableHeadCell>
+                        </TableHead>
+                        <TableBody>
+                            {addressList.map((addr) => (
+                                <tr key={addr.id}>
+                                    <TableCell>{addr.id}</TableCell>
+                                    <TableCell>{addr.name1}</TableCell>
+                                    <TableCell>{addr.city}</TableCell>
+                                    <TableCell>{addr.state}</TableCell>
+                                    <TableCell>{addr.zip}</TableCell>
+                                    <TableCell>
+                                        <Button
+                                            size="xs"
+                                            onClick={() => {
+                                                if (!addressFieldTarget) return;
+
+                                                // Update newAccount with address ID
+                                                handleInputChange(addressFieldTarget, String(addr.id));
+
+                                                // Update display state
+                                                if (addressFieldTarget === "address") {
+                                                    setSelectedAddress(addr);
+                                                } else if (addressFieldTarget === "billtoaddress") {
+                                                    setSelectedBillToAddress(addr);
+                                                }
+
+                                                setShowAddressModal(false);
+                                                setAddressFieldTarget(null);
+                                            }}
+                                        >
+                                            Choose
+                                        </Button>
+                                    </TableCell>
+                                </tr>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </ModalBody>
+                <ModalFooter>
+                    <Button color="gray" onClick={() => setShowAddressModal(false)}>
+                        Cancel
+                    </Button>
+                </ModalFooter>
+            </Modal>
 
             {loading && (
                 <div className="mt-6 flex justify-center">
@@ -217,21 +310,17 @@ export default function Accounts() {
                             {accountsData.map((account) => (
                                 <TableRow
                                     key={account.accountid}
-                                    className="bg-white dark:bg-gray-800"
-                                    onClick={(e) => {
-                                        if (!e.target.innerText.includes("Delete")) {
-                                            navigate(
-                                                `/psliveaccount?accountid=${account.accountid}`
-                                            );
-                                        }
-                                    }}
+                                    className="bg-white dark:bg-gray-800 cursor-pointer"
+                                    onClick={() =>
+                                        navigate(`/psliveaccount?accountid=${account.accountid}`)
+                                    }
                                 >
                                     <TableCell>
                                         <Button
                                             color="failure"
                                             size="sm"
                                             onClick={(e) => {
-                                                e.preventDefault();
+                                                e.stopPropagation(); // ✅ prevent row click
                                                 handleDeleteAccount(account.accountid);
                                             }}
                                         >
@@ -256,6 +345,7 @@ export default function Accounts() {
                     </Table>
                 </div>
             )}
+
         </div>
     );
 }
