@@ -202,9 +202,9 @@ export default function OrderEditor() {
                         {/* Order Lines Table */}
                         <Table hoverable className="mt-6">
                             <TableHead>
-                                <TableHeadCell></TableHeadCell>
-                                <TableHeadCell></TableHeadCell>
                                 <TableHeadCell>ID</TableHeadCell>
+                                <TableHeadCell></TableHeadCell>
+                                <TableHeadCell></TableHeadCell>
                                 <TableHeadCell>Order ID</TableHeadCell>
                                 <TableHeadCell>Product</TableHeadCell>
                             </TableHead>

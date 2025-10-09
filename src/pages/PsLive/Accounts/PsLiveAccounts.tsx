@@ -12,6 +12,7 @@ import {
 import { Account } from "../../../types/pslive.type";
 import { useNavigate } from "react-router-dom";
 
+
 export default function Accounts() {
     const API_URL = import.meta.env.VITE_PSLIVE_URL;
     const navigate = useNavigate();
@@ -41,6 +42,7 @@ export default function Accounts() {
                 return res.json();
             })
             .then((createdAccount: Result) => {
+                console.log(createdAccount)
                 setAccountsData((prev) =>
                     prev ? [createdAccount.result, ...prev] : [createdAccount.result]
                 );
@@ -70,6 +72,7 @@ export default function Accounts() {
             console.error(err);
             alert("An error occurred while deleting the account.");
         } finally {
+            navigate("/psliveaccounts")
             setLoading(false);
         }
     };
@@ -106,8 +109,11 @@ export default function Accounts() {
                                 <TableRow
                                     key={account.accountid}
                                     className="bg-white dark:bg-gray-800"
-                                    onClick={() =>
-                                        navigate(`/psliveaccount?accountid=${account.accountid}`)
+                                    onClick={(e) => {
+                                        if (!e.target.innerText.includes("Delete")) {
+                                            navigate(`/psliveaccount?accountid=${account.accountid}`)
+                                        }
+                                    }
                                     }
                                 >
                                     {/* Delete button */}
@@ -116,7 +122,7 @@ export default function Accounts() {
                                             color="failure"
                                             size="sm"
                                             onClick={(e) => {
-                                                e.preventDefault();
+                                                e.preventDefault()
                                                 handleDeleteAccount(account.accountid);
                                             }}
                                         >

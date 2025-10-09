@@ -77,7 +77,7 @@ export default function AccountEditor() {
             e.preventDefault();
 
         if (!accountId) {
-            alert("Please enter an Account ID");
+            // alert("Please enter an Account ID");
             return;
         }
 
@@ -95,18 +95,18 @@ export default function AccountEditor() {
             alert("Account Updated")
         } catch (err) {
             console.error(err);
-            alert("Something went wrong while saving the account.");
+            alert(`Something went wrong while fetching account ${accountId}.`);
         } finally {
             setLoading(false);
         }
     };
 
 
-    // useEffect(() => {
+    useEffect(() => {
 
-    //     handleSubmit()
+        handleSubmit()
 
-    // }, [])
+    }, [])
 
 
     async function fetchAddresses() {
@@ -124,10 +124,10 @@ export default function AccountEditor() {
     return (
         <div>
             <h1 className="relative text-center text-4xl leading-[125%] font-bold text-gray-900 dark:text-gray-200">
-                Account
+                Account {accountId}
             </h1>
 
-            <form className="mx-auto mt-6 flex max-w-md flex-col gap-4" onSubmit={handleSubmit}>
+            {/* <form className="mx-auto mt-6 flex max-w-md flex-col gap-4" onSubmit={handleSubmit}>
                 <div>
                     <Label className="mb-2 block" htmlFor="accountid">
                         Enter Account ID
@@ -154,7 +154,7 @@ export default function AccountEditor() {
                         Download PDF
                     </Button>
                 </div>
-            </form>
+            </form> */}
 
             {loading && (
                 <div className="mt-6 flex justify-center">
@@ -164,6 +164,16 @@ export default function AccountEditor() {
 
             {account && tempAccount && (
                 <div className="mx-auto max-w-4xl mt-8">
+                    <Button
+                        type="button"
+                        disabled={!accountId}
+                        onClick={() => {
+                            if (!accountId) return;
+                            window.open(`${API_URL}/accountpdf/${accountId}`, "_blank");
+                        }}
+                    >
+                        Download PDF
+                    </Button>
                     <form className="flex flex-wrap gap-4" onSubmit={handleSubmit}>
                         <div className="flex min-w-[200px] flex-1 flex-col gap-4">
                             <Label htmlFor="chemicalinfo">Chemical Info</Label>

@@ -39,7 +39,7 @@ export interface Order {
 
 export interface Product {
     id: number;
-    productid: string;
+    productcode: string;
     name: string;
     height: string;
     price: number;
