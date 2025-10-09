@@ -53,6 +53,8 @@ export default function AccountEditor() {
             setAccount(data);
             setTempAccount(data);
 
+            console.log(data)
+
             const addressResponse = await (await fetch(`${API_URL}/address/${data.address}`)).json();
             setAddress(addressResponse);
 
@@ -162,7 +164,7 @@ export default function AccountEditor() {
                 </div>
             )}
 
-            {account && tempAccount && (
+            {account && tempAccount && billToAddress && address && (
                 <div className="mx-auto max-w-4xl mt-8">
                     <Button
                         type="button"
