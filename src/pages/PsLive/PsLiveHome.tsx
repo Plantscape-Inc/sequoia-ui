@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 export default function Home() {
     const links = [
-        { label: "Accounts", path: "/psliveaccounts" },
+        { label: "AccountSheets", path: "/psliveaccounts" },
         { label: "Orders", path: "/psliveorders" },
         { label: "Addresses", path: "/psliveaddresses" },
         { label: "Products", path: "/psliveproducts" },
@@ -17,12 +17,12 @@ export default function Home() {
                     Click the upper left menu to access available pages
                 </h3>
 
-                <div className="mx-auto mt-10 grid max-w-3xl grid-cols-1 gap-6 sm:grid-cols-2">
+                <div className="mx-auto mt-10 grid max-w-3xl grid-cols-1 gap-6 sm:grid-cols-2 justify-items-center">
                     {links.map((link) => (
                         <Link
                             to={link.path}
                             key={link.path}
-                            className="flex h-32 items-center justify-center rounded-xl border border-gray-200 bg-white shadow-md transition-shadow duration-200 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800"
+                            className="block flex h-32 w-full max-w-sm items-center justify-center rounded-xl border border-gray-200 bg-white shadow-md transition-shadow duration-200 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800"
                         >
                             <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-200">
                                 {link.label}
@@ -30,6 +30,7 @@ export default function Home() {
                         </Link>
                     ))}
                 </div>
+
             </div>
         </div>
     );

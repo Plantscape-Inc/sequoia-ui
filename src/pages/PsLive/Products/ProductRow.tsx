@@ -35,7 +35,7 @@ export const ProductRow = memo(function ProductRow({
                     <Button color="failure" size="xs" onClick={onDelete}>Delete</Button>
                 </TableCell>
                 <TableCell>
-                    <TextInput value={draftProduct.productid} onChange={(e) => handleChange("productid", e.target.value)} />
+                    <TextInput value={draftProduct.productcode} onChange={(e) => handleChange("productcode", e.target.value)} />
                 </TableCell>
                 <TableCell>
                     <TextInput value={draftProduct.name ?? ""} onChange={(e) => handleChange("name", e.target.value)} />
@@ -63,7 +63,7 @@ export const ProductRow = memo(function ProductRow({
             <TableCell>
                 <Button color="failure" size="xs" onClick={onDelete}>Delete</Button>
             </TableCell>
-            <TableCell>{product.productid}</TableCell>
+            <TableCell>{product.productcode}</TableCell>
             <TableCell>{product.name}</TableCell>
             <TableCell>{product.height}</TableCell>
             <TableCell>{product.price}</TableCell>

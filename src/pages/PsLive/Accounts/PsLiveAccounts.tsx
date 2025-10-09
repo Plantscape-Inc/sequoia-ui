@@ -142,7 +142,7 @@ export default function Accounts() {
     return (
         <div>
             <h1 className="relative text-center text-4xl leading-[125%] font-bold text-gray-900 dark:text-gray-200">
-                Accounts
+                Account Sheets
             </h1>
 
             <div className="mt-4 flex justify-center">

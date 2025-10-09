@@ -1,333 +1,3 @@
-// import { lazy, Suspense, useMemo, useState } from 'react';
-// import {
-//     MaterialReactTable,
-//     type MRT_ColumnDef,
-//     useMaterialReactTable,
-// } from 'material-react-table';
-// import {
-//     Box,
-//     Button,
-//     CircularProgress,
-//     createTheme,
-//     IconButton,
-//     ThemeProvider,
-//     Tooltip,
-// } from '@mui/material';
-// import { QueryClient, QueryClientProvider, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-// import DeleteIcon from '@mui/icons-material/Delete';
-
-// // --- PRODUCT TYPE ---
-// export interface Product {
-//     id: number;
-//     productid: string;
-//     name: string;
-//     height: string;
-//     price: number;
-// }
-
-
-// const Example = () => {
-
-//     const API_URL = import.meta.env.VITE_PSLIVE_URL;
-//     const [validationErrors, setValidationErrors] = useState<Record<string, string | undefined>>({});
-//     const [editedProducts, setEditedProducts] = useState<Record<string, Product>>({});
-//     const queryClient = useQueryClient();
-
-
-//     const columns = useMemo<MRT_ColumnDef<Product>[]>(() => [
-//         { accessorKey: 'id', header: 'ID', enableEditing: false, size: 50 },
-
-//         {
-//             accessorKey: 'productid',
-//             header: 'Product Code',
-//             muiEditTextFieldProps: ({ cell, row }) => ({
-//                 error: !!validationErrors[cell.id],
-//                 helperText: validationErrors[cell.id],
-//                 onBlur: (event) => {
-//                     const value = event.currentTarget.value;
-//                     setValidationErrors({
-//                         ...validationErrors,
-//                         [cell.id]: value ? undefined : 'Product ID is required',
-//                     });
-//                     setEditedProducts({
-//                         ...editedProducts,
-//                         [row.id]: {
-//                             ...row.original,
-//                             ...editedProducts[row.id],
-//                             productid: value,
-//                         },
-//                     });
-//                 },
-//             }),
-//         },
-
-//         {
-//             accessorKey: 'name',
-//             header: 'Name',
-//             muiEditTextFieldProps: ({ cell, row }) => ({
-//                 error: !!validationErrors[cell.id],
-//                 helperText: validationErrors[cell.id],
-//                 onBlur: (event) => {
-//                     const value = event.currentTarget.value;
-//                     setValidationErrors({
-//                         ...validationErrors,
-//                         [cell.id]: value ? undefined : 'Name is required',
-//                     });
-//                     setEditedProducts({
-//                         ...editedProducts,
-//                         [row.id]: {
-//                             ...row.original,
-//                             ...editedProducts[row.id],
-//                             name: value,
-//                         },
-//                     });
-//                 },
-//             }),
-//         },
-
-//         {
-//             accessorKey: 'height',
-//             header: 'Height',
-//             muiEditTextFieldProps: ({ cell, row }) => ({
-//                 error: !!validationErrors[cell.id],
-//                 helperText: validationErrors[cell.id],
-//                 onBlur: (event) => {
-//                     const value = event.currentTarget.value;
-//                     setValidationErrors({
-//                         ...validationErrors,
-//                         [cell.id]: value ? undefined : 'Height is required',
-//                     });
-//                     setEditedProducts({
-//                         ...editedProducts,
-//                         [row.id]: {
-//                             ...row.original,
-//                             ...editedProducts[row.id],
-//                             height: value,
-//                         },
-//                     });
-//                 },
-//             }),
-//         },
-
-//         {
-//             accessorKey: 'price',
-//             header: 'Price',
-//             muiEditTextFieldProps: ({ cell, row }) => ({
-//                 type: 'number',
-//                 error: !!validationErrors[cell.id],
-//                 helperText: validationErrors[cell.id],
-//                 onBlur: (event) => {
-//                     const value = parseFloat(event.currentTarget.value);
-//                     setValidationErrors({
-//                         ...validationErrors,
-//                         [cell.id]: isNaN(value) ? 'Price must be a number' : undefined,
-//                     });
-//                     setEditedProducts({
-//                         ...editedProducts,
-//                         [row.id]: {
-//                             ...row.original,
-//                             ...editedProducts[row.id],
-//                             price: isNaN(value) ? 0 : value,
-//                         },
-//                     });
-//                 },
-//             }),
-//         },
-//     ], [editedProducts, validationErrors]);
-
-
-//     // --- QUERY: READ ---
-//     const { data: products, isLoading: isLoadingProducts } = useQuery<Product[]>({
-//         queryKey: ['products'],
-//         queryFn: async () => {
-//             const products = await (await fetch(`${API_URL}/products`)).json()
-//             if (!products) {
-//                 console.error("aspoidfjpaosidjf")
-//             }
-//             return products;
-//         },
-//         refetchOnWindowFocus: false,
-//     });
-
-//     // --- MUTATIONS ---
-//     const createProduct = useMutation({
-//         mutationFn: async (product: Product) => {
-//             await new Promise((resolve) => setTimeout(resolve, 500));
-//             return product;
-//         },
-//         onMutate: async (newProduct: Product) => {
-//             await queryClient.cancelQueries({ queryKey: ['products'] });
-//             const previous = queryClient.getQueryData<Product[]>(['products']);
-//             queryClient.setQueryData(['products'], (old: Product[]) => [newProduct, ...old]);
-//             return { previous };
-//         },
-//         onError: (_err, _newProduct, context) => {
-//             queryClient.setQueryData(['products'], context?.previous);
-//         },
-//         onSettled: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
-//     });
-
-//     const updateProducts = useMutation({
-//         mutationFn: async (products: Product[]) => {
-//             // Loop through each product and send API request
-
-
-//             const responses = await Promise.all(
-//                 products.map(async (product) => {
-//                     product.id = Math.floor(Math.random() * 10000) + 1
-//                     console.log(product)
-//                     const res = await fetch(`${API_URL}/product/${product.id}`, {
-//                         method: 'PUT',
-//                         headers: { 'Content-Type': 'application/json' },
-//                         body: JSON.stringify(product),
-//                     });
-//                     if (!res.ok) throw new Error(`Failed to update product ${product.id}`);
-//                     return res.json();
-//                 })
-//             );
-//             return responses;
-//         },
-//         onMutate: async (updatedProducts: Product[]) => {
-//             await queryClient.cancelQueries({ queryKey: ['products'] });
-//             const previous = queryClient.getQueryData<Product[]>(['products']);
-//             queryClient.setQueryData(['products'], (old: Product[]) =>
-//                 old.map((p: Product) => updatedProducts.find((u) => u.id === p.id) ?? p)
-//             );
-//             return { previous };
-//         },
-//         onError: (_err, _products, context) => {
-//             queryClient.setQueryData(['products'], context?.previous);
-//         },
-//         onSettled: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
-//     });
-
-
-//     const deleteProduct = useMutation({
-//         mutationFn: async (id: number) => {
-//             await new Promise((resolve) => setTimeout(resolve, 500));
-//             return id;
-//         },
-//         onMutate: async (id: number) => {
-//             await queryClient.cancelQueries({ queryKey: ['products'] });
-//             const previous = queryClient.getQueryData<Product[]>(['products']);
-//             queryClient.setQueryData(['products'], (old: Product[]) => old.filter((p: Product) => p.id !== id));
-//             return { previous };
-//         },
-//         onError: (_err, _id, context) => {
-//             queryClient.setQueryData(['products'], context?.previous);
-//         },
-//         onSettled: () => queryClient.invalidateQueries({ queryKey: ['products'] }),
-//     });
-
-//     // --- CREATE / EDIT HANDLERS ---
-//     // const handleCreate: MRT_TableOptions<Product>['onCreatingRowSave'] = async ({ values, table }) => {
-//     //     createProduct.mutate(values);
-//     //     table.setCreatingRow(null);
-//     // };
-
-//     const handleSave = () => {
-//         if (Object.values(validationErrors).some((error) => !!error)) return;
-//         updateProducts.mutate(Object.values(editedProducts));
-//         setEditedProducts({});
-//     };
-
-//     const handleDelete = (rowId: number) => {
-//         if (window.confirm('Are you sure you want to delete this product?')) {
-//             deleteProduct.mutate(rowId);
-//         }
-//     };
-
-//     // --- TABLE SETUP ---
-//     const table = useMaterialReactTable({
-//         columns,
-//         data: products ?? [],
-//         enableEditing: true,
-//         enableRowActions: true,
-//         positionActionsColumn: 'last',
-//         createDisplayMode: 'row',
-//         editDisplayMode: 'table',
-//         getRowId: (row) => row.id,
-//         muiToolbarAlertBannerProps: undefined,
-//         renderRowActions: ({ row }) => (
-//             <Box sx={{ display: 'flex', gap: '0.5rem' }}>
-//                 <Tooltip title="Delete">
-//                     <IconButton color="error" onClick={() => handleDelete(row.original.id)}>
-//                         <DeleteIcon />
-//                     </IconButton>
-//                 </Tooltip>
-//             </Box>
-//         ),
-//         renderTopToolbarCustomActions: ({ table }) => (
-//             <Button variant="contained" onClick={() => table.setCreatingRow(true)}>
-//                 Create New Product
-//             </Button>
-//         ),
-//         renderBottomToolbarCustomActions: () => (
-//             <Button
-//                 variant="contained"
-//                 color="success"
-//                 onClick={handleSave}
-//                 disabled={Object.keys(editedProducts).length === 0}
-//             >
-//                 {updateProducts.isPending ? <CircularProgress size={25} /> : 'Save'}
-//             </Button>
-//         ),
-//         state: {
-//             isLoading: isLoadingProducts,
-//             isSaving: createProduct.isPending || updateProducts.isPending || deleteProduct.isPending,
-//         },
-//     });
-
-//     return (<MaterialReactTable table={table} />);
-// };
-
-// // --- REACT QUERY SETUP ---
-// const queryClient = new QueryClient();
-
-// export default function PsLiveProducts() {
-
-//     const darkTheme = createTheme({
-//         palette: {
-//             mode: 'dark',
-//             primary: {
-//                 main: '#90caf9',
-//             },
-//             secondary: {
-//                 main: '#f48fb1',
-//             },
-//             background: {
-//                 default: '#121212',
-//                 paper: '#1d1d1d',
-//             },
-//         },
-//     });
-
-//     return (
-//         <div>
-//             <h1 className="text-center text-4xl leading-[125%] font-bold text-gray-900 dark:text-gray-200">
-//                 Plantscape Live Products
-//             </h1>
-//             <QueryClientProvider client={queryClient}>
-//                 <ThemeProvider theme={darkTheme}>
-//                     <Example />
-
-//                 </ThemeProvider>
-
-//                 <Suspense fallback={null}>
-//                     <ReactQueryDevtoolsProduction />
-//                 </Suspense>
-//             </QueryClientProvider>
-//         </div>
-
-//     );
-// }
-
-// // --- REACT QUERY DEVTOOLS ---
-// const ReactQueryDevtoolsProduction = lazy(() =>
-//     import('@tanstack/react-query-devtools/build/modern/production.js').then((d) => ({ default: d.ReactQueryDevtools }))
-// );
-
-
 import { useEffect, useState } from "react";
 import {
     Spinner,
@@ -349,7 +19,7 @@ import {
 
 export interface Product {
     id: number;
-    productid: string;
+    productcode: string;
     name: string;
     height: string;
     price: number;
@@ -369,7 +39,7 @@ export default function Products() {
 
     const blankProduct: Product = {
         id: Math.floor(Math.random() * 10000) + 1,
-        productid: "",
+        productcode: "",
         name: "",
         height: "",
         price: 0,
@@ -508,7 +178,7 @@ export default function Products() {
                 <Table hoverable>
                     <TableHead>
                         <TableHeadCell>ID</TableHeadCell>
-                        <TableHeadCell>Product ID</TableHeadCell>
+                        <TableHeadCell>Product Code</TableHeadCell>
                         <TableHeadCell>Name</TableHeadCell>
                         <TableHeadCell>Height</TableHeadCell>
                         <TableHeadCell>Price</TableHeadCell>
@@ -521,7 +191,7 @@ export default function Products() {
                                 onClick={() => handleRowClick(product)}
                             >
                                 <TableCell>{product.id}</TableCell>
-                                <TableCell>{product.productid}</TableCell>
+                                <TableCell>{product.productcode}</TableCell>
                                 <TableCell>{product.name}</TableCell>
                                 <TableCell>{product.height}</TableCell>
                                 <TableCell>{product.price}</TableCell>
@@ -541,14 +211,14 @@ export default function Products() {
 
                     <div className="space-y-4">
                         <div>
-                            <Label htmlFor="productid">Product ID</Label>
+                            <Label htmlFor="productid">Product Code</Label>
                             <TextInput
                                 id="productid"
                                 name="productid"
-                                value={formData?.productid || ""}
+                                value={formData?.productcode || ""}
                                 onChange={handleInputChange}
                                 required
-                                placeholder="Enter product ID"
+                                placeholder="Enter product Code"
                             />
                         </div>
                         <div>

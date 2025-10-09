@@ -275,7 +275,6 @@ export default function AccountEditor() {
                                             throw new Error(errorData.message);
                                         }
 
-                                        alert("Account location created successfully");
                                         window.location.reload();
                                     } catch (error) {
                                         console.error("Error creating location:", error);
