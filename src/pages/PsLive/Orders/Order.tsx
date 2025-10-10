@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {
     Button,
     Label,
-    TextInput,
+    // TextInput,
     Modal,
     ModalHeader,
     ModalBody,
@@ -141,9 +141,9 @@ export default function OrderEditor() {
 
     return (
         <div>
-            <h1 className="text-center text-4xl font-bold text-gray-900 dark:text-gray-200">Order</h1>
+            <h1 className="text-center text-4xl font-bold text-gray-900 dark:text-gray-200">Order {orderId}</h1>
 
-            <div className="mx-auto mt-6 max-w-md flex flex-col gap-4">
+            {/* <div className="mx-auto mt-6 max-w-md flex flex-col gap-4">
                 <Label htmlFor="orderid">Enter Order ID</Label>
                 <TextInput
                     id="orderid"
@@ -154,7 +154,7 @@ export default function OrderEditor() {
                 <Button onClick={() => updateOrder(orderId)} disabled={loading}>
                     {loading ? "Loading..." : "Load Order"}
                 </Button>
-            </div>
+            </div> */}
 
             {
                 order && tempOrder && (
