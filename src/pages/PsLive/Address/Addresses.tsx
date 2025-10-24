@@ -36,6 +36,11 @@ export default function Addresses() {
 
     const [searchTerm, setSearchTerm] = useState("");
 
+
+    // const inputClass = "max-w-[100px]";
+    const tableCellClass = "max-w-[100px] truncate text-center";
+
+
     const blankAddress: Address = {
         id: Math.floor(Math.random() * 10000) + 1,
         name1: "",
@@ -64,27 +69,25 @@ export default function Addresses() {
             .finally(() => setLoading(false));
     }, [addressesData, API_URL]);
 
-    // Filter addresses when data or search term changes
-    useEffect(() => {
-        async function filterAddresses() {
-            if (!addressesData) {
-                setFilteredAddresses([]);
-                return;
-            }
-
-            if (!searchTerm.trim()) {
-                setFilteredAddresses(addressesData);
-                return;
-            }
-
-            const results = await searchProducts(searchTerm, addressesData);
-            setFilteredAddresses(results);
+    async function filterAddresses() {
+        if (!addressesData) {
+            setFilteredAddresses([]);
+            return;
         }
 
+        if (!searchTerm.trim()) {
+            setFilteredAddresses(addressesData);
+            return;
+        }
+
+        const results = await searchProducts(searchTerm, addressesData);
+        setFilteredAddresses(results);
+    }
+
+    useEffect(() => {
         filterAddresses();
     }, [addressesData, searchTerm]);
 
-    // Auto-open modal if URL has addressid
     useEffect(() => {
         if (!addressesData) return;
         const idParam = searchParams.get("addressid");
@@ -262,7 +265,7 @@ export default function Addresses() {
                 )}
 
                 {!loading && addressesData && (
-                    <Table hoverable>
+                    <Table hoverable className="mx-auto">
                         <TableHead>
                             <TableHeadCell>ID</TableHeadCell>
                             <TableHeadCell>Name 1</TableHeadCell>
@@ -274,20 +277,20 @@ export default function Addresses() {
                             <TableHeadCell>Contact</TableHeadCell>
                         </TableHead>
                         <TableBody className="divide-y">
-                            {filteredAddresses.slice(0, 20).map((address) => (
+                            {filteredAddresses.map((address) => (
                                 <TableRow
                                     key={address.id}
                                     className="cursor-pointer bg-white hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
                                     onClick={() => handleRowClick(address)}
                                 >
-                                    <TableCell>{address.id}</TableCell>
-                                    <TableCell>{address.name1}</TableCell>
-                                    <TableCell>{address.name2 || "-"}</TableCell>
-                                    <TableCell>{address.address1}</TableCell>
-                                    <TableCell>{address.city}</TableCell>
-                                    <TableCell>{address.state}</TableCell>
-                                    <TableCell>{address.zip}</TableCell>
-                                    <TableCell>{address.contact}</TableCell>
+                                    <TableCell className={tableCellClass}>{address.id}</TableCell>
+                                    <TableCell className={tableCellClass}>{address.name1}</TableCell>
+                                    <TableCell className={tableCellClass}>{address.name2 || "-"}</TableCell>
+                                    <TableCell className={tableCellClass}>{address.address1}</TableCell>
+                                    <TableCell className={tableCellClass}>{address.city}</TableCell>
+                                    <TableCell className={tableCellClass}>{address.state}</TableCell>
+                                    <TableCell className={tableCellClass}>{address.zip}</TableCell>
+                                    <TableCell className={tableCellClass}>{address.contact}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
