@@ -124,11 +124,11 @@ export default function AccountLocationDisplay({
 
     return (
         <Card className="my-6">
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center dark:text-gray-200">
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-200">
                     Location {localLocation.locationcode}
                 </h3>
-                <Dropdown label="Options" inline size="sm" color="gray">
+                <Dropdown label="Options" inline size="sm" color="white" className="dark:text-gray-200">
                     <DropdownItem onClick={deleteLocation}>Delete</DropdownItem>
                 </Dropdown>
             </div>
@@ -144,15 +144,6 @@ export default function AccountLocationDisplay({
                     />
                 </div>
 
-                <div>
-                    <Label htmlFor="accountid" >Account ID</Label>
-                    <TextInput
-                        id="accountid"
-                        value={localLocation.accountid}
-                        onChange={(e) => handleFieldChange("accountid", e.target.value)}
-                        readOnly
-                    />
-                </div>
 
                 <div>
                     <Label htmlFor="locationcode" >Location Code </Label>

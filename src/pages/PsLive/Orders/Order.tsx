@@ -2,19 +2,14 @@ import { useEffect, useState } from "react";
 import {
     Button,
     Label,
-    // TextInput,
-    Modal,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
     Table,
     TableHead,
     TableHeadCell,
     TableBody,
-    TableCell,
 } from "flowbite-react";
 import { Order, OrderLine, Address } from "../../../types/pslive.type";
 import OrderLineDisplay from "./OrderLine";
+import AddressSelectionModal from "../Address/AddressSelectionModal";
 
 export default function OrderEditor() {
     const API_URL = import.meta.env.VITE_PSLIVE_URL;
@@ -27,6 +22,7 @@ export default function OrderEditor() {
 
     const [billingAddress, setBillingAddress] = useState<Address | null>(null);
     const [shippingAddress, setShippingAddress] = useState<Address | null>(null);
+
 
     // Address modal state
     const [showAddressModal, setShowAddressModal] = useState(false);
@@ -218,59 +214,26 @@ export default function OrderEditor() {
                 )
             }
 
-            {/* Address Modal */}
-            <Modal show={showAddressModal} size="5xl" onClose={() => setShowAddressModal(false)}>
-                <ModalHeader>Select Address</ModalHeader>
-                <ModalBody>
-                    <Table hoverable>
-                        <TableHead>
-                            <TableHeadCell>ID</TableHeadCell>
-                            <TableHeadCell>Name</TableHeadCell>
-                            <TableHeadCell>City</TableHeadCell>
-                            <TableHeadCell>State</TableHeadCell>
-                            <TableHeadCell>Zip</TableHeadCell>
-                            <TableHeadCell>Select</TableHeadCell>
-                        </TableHead>
-                        <TableBody>
-                            {addressList.map((addr) => (
-                                <tr key={addr.id}>
-                                    <TableCell>{addr.id}</TableCell>
-                                    <TableCell>{addr.name1}</TableCell>
-                                    <TableCell>{addr.city}</TableCell>
-                                    <TableCell>{addr.state}</TableCell>
-                                    <TableCell>{addr.zip}</TableCell>
-                                    <TableCell>
-                                        <Button
-                                            size="xs"
-                                            onClick={() => {
-                                                if (!tempOrder || !addressFieldTarget) return;
 
-                                                if (addressFieldTarget === "billing") {
-                                                    tempOrder.billing_address = addr;
-                                                    setBillingAddress(addr);
-                                                } else {
-                                                    tempOrder.shipping_address = addr;
-                                                    setShippingAddress(addr);
-                                                }
+            <AddressSelectionModal
+                show={showAddressModal}
+                onClose={() => setShowAddressModal(false)}
+                onSelect={(addr) => {
+                    if (!tempOrder || !addressFieldTarget) return;
 
-                                                setShowAddressModal(false);
-                                                setAddressFieldTarget(null);
-                                            }}
-                                        >
-                                            Choose
-                                        </Button>
-                                    </TableCell>
-                                </tr>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </ModalBody>
-                <ModalFooter>
-                    <Button color="gray" onClick={() => setShowAddressModal(false)}>
-                        Cancel
-                    </Button>
-                </ModalFooter>
-            </Modal>
+                    if (addressFieldTarget === "billing") {
+                        tempOrder.billing_address = addr;
+                        setBillingAddress(addr);
+                    } else {
+                        tempOrder.shipping_address = addr;
+                        setShippingAddress(addr);
+                    }
+
+                    setShowAddressModal(false);
+                    setAddressFieldTarget(null);
+                }}
+                addresses={addressList}
+            />
         </div >
     );
 }
