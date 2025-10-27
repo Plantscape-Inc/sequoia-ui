@@ -7,9 +7,10 @@ import {
     TableHeadCell,
     TableBody,
 } from "flowbite-react";
-import { Order, OrderLine, Address } from "../../../types/pslive.type";
+import { Order, OrderLine, Address, Account } from "../../../types/pslive.type";
 import OrderLineDisplay from "./OrderLine";
 import AddressSelectionModal from "../Address/AddressSelectionModal";
+import AccountSelectionModal from "../Accounts/PsLiveAccountSelectionModal";
 
 export default function OrderEditor() {
     const API_URL = import.meta.env.VITE_PSLIVE_URL;
@@ -23,6 +24,9 @@ export default function OrderEditor() {
     const [billingAddress, setBillingAddress] = useState<Address | null>(null);
     const [shippingAddress, setShippingAddress] = useState<Address | null>(null);
 
+    // Account modal state
+    const [showAccountModal, setShowAccountModal] = useState<boolean>(false);
+    const [accountList, setAccountList] = useState<Account[]>([]);
 
     // Address modal state
     const [showAddressModal, setShowAddressModal] = useState(false);
@@ -59,13 +63,6 @@ export default function OrderEditor() {
         }
     }
 
-    // const handleChange = (field: keyof Order, value: unknown) => {
-    //     if (!tempOrder) return;
-    //     const updated = { ...tempOrder, [field]: value } as Order;
-    //     updated.total = updated.fp + updated.travel;
-    //     setTempOrder(updated);
-    // };
-
     const fetchAddresses = async () => {
         try {
             const res = await fetch(`${API_URL}/addresses`);
@@ -78,12 +75,23 @@ export default function OrderEditor() {
         }
     };
 
+    const fetchAccounts = async () => {
+        try {
+            const res = await fetch(`${API_URL}/accounts`);
+            if (!res.ok) throw new Error("Failed to fetch accounts");
+            const data: Account[] = await res.json();
+            setAccountList(data);
+        } catch (err) {
+            console.error(err);
+            alert("Error fetching accounts");
+        }
+    };
+
     const handleUpdate = async () => {
         if (!tempOrder) return;
 
         setLoading(true);
         try {
-
             const payload = {
                 ...tempOrder,
                 billto: typeof tempOrder.billing_address === "object"
@@ -137,84 +145,87 @@ export default function OrderEditor() {
 
     return (
         <div>
-            <h1 className="text-center text-4xl font-bold text-gray-900 dark:text-gray-200">Order {orderId}</h1>
+            <h1 className="text-center text-4xl font-bold text-gray-900 dark:text-gray-200">
+                Order {orderId}
+            </h1>
 
-            {/* <div className="mx-auto mt-6 max-w-md flex flex-col gap-4">
-                <Label htmlFor="orderid">Enter Order ID</Label>
-                <TextInput
-                    id="orderid"
-                    type="number"
-                    value={orderId}
-                    onChange={(e) => updateOrder(Number(e.target.value))}
-                />
-                <Button onClick={() => updateOrder(orderId)} disabled={loading}>
-                    {loading ? "Loading..." : "Load Order"}
-                </Button>
-            </div> */}
-
-            {
-                order && tempOrder && (
-                    <div className="mx-auto mt-8 max-w-4xl">
-                        {/* Addresses */}
-                        <div className="flex gap-8">
-                            <div className="flex-1">
-                                <Label>Billing Address</Label>
-                                <Button
-                                    size="sm"
-                                    onClick={() => {
-                                        setAddressFieldTarget("billing");
-                                        setShowAddressModal(true);
-                                        fetchAddresses();
-                                    }}
-                                >
-                                    {billingAddress ? billingAddress.name1 : "Select"}
-                                </Button>
-                            </div>
-                            <div className="flex-1">
-                                <Label>Shipping Address</Label>
-                                <Button
-                                    size="sm"
-                                    onClick={() => {
-                                        setAddressFieldTarget("shipping");
-                                        setShowAddressModal(true);
-                                        fetchAddresses();
-                                    }}
-                                >
-                                    {shippingAddress ? shippingAddress.name1 : "Select"}
-                                </Button>
-                            </div>
-                        </div>
-
-                        {/* Update Order */}
-                        <div className="mt-4 flex">
-                            <Button onClick={handleUpdate} disabled={loading}>
-                                {loading ? "Updating..." : "Update Order"}
-                            </Button>
-                            <Button className="ml-2" onClick={addOrderLine}>
-                                Add Order Line
+            {order && tempOrder && (
+                <div className="mx-auto mt-8 max-w-4xl">
+                    {/* Address and Account Fields */}
+                    <div className="flex gap-8 items-end">
+                        <div className="flex-1">
+                            <Label>Billing Address</Label>
+                            <Button
+                                size="sm"
+                                onClick={() => {
+                                    setAddressFieldTarget("billing");
+                                    setShowAddressModal(true);
+                                    fetchAddresses();
+                                }}
+                            >
+                                {billingAddress ? billingAddress.name1 : "Select"}
                             </Button>
                         </div>
 
-                        {/* Order Lines Table */}
-                        <Table hoverable className="mt-6">
-                            <TableHead>
-                                <TableHeadCell>ID</TableHeadCell>
-                                <TableHeadCell></TableHeadCell>
-                                <TableHeadCell></TableHeadCell>
-                                <TableHeadCell>Order ID</TableHeadCell>
-                                <TableHeadCell>Product</TableHeadCell>
-                            </TableHead>
-                            <TableBody>
-                                {order.lines.map((line) => (
-                                    <OrderLineDisplay key={line.id} line={line} />
-                                ))}
-                            </TableBody>
-                        </Table>
+                        <div className="flex-1">
+                            <Label>Physical Address</Label>
+                            <Button
+                                size="sm"
+                                onClick={() => {
+                                    setAddressFieldTarget("shipping");
+                                    setShowAddressModal(true);
+                                    fetchAddresses();
+                                }}
+                            >
+                                {shippingAddress ? shippingAddress.name1 : "Select"}
+                            </Button>
+                        </div>
+
+                        <div className="flex-1">
+                            <Label htmlFor="accountlocid">Account Location ID</Label>
+                            <Button
+                                size="sm"
+                                onClick={() => {
+                                    setShowAccountModal(true);
+                                    fetchAccounts();
+                                }}
+                            >
+                                {tempOrder.accountlocid || "Select Account"}
+                            </Button>
+                        </div>
                     </div>
-                )
-            }
 
+                    {/* Update Order */}
+                    <div className="mt-4 flex justify-between items-center">
+                        <Button onClick={addOrderLine}>Add Order Line</Button>
+                        <Button
+                            className="ml-2 bg-green-600"
+                            onClick={handleUpdate}
+                            disabled={loading}
+                        >
+                            {loading ? "Updating..." : "Update Order"}
+                        </Button>
+                    </div>
 
+                    {/* Order Lines Table */}
+                    <Table hoverable className="mt-6">
+                        <TableHead>
+                            <TableHeadCell>ID</TableHeadCell>
+                            <TableHeadCell></TableHeadCell>
+                            <TableHeadCell></TableHeadCell>
+                            <TableHeadCell>Order ID</TableHeadCell>
+                            <TableHeadCell>Product</TableHeadCell>
+                        </TableHead>
+                        <TableBody>
+                            {order.lines.map((line) => (
+                                <OrderLineDisplay key={line.id} line={line} />
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            )}
+
+            {/* Address Modal */}
             <AddressSelectionModal
                 show={showAddressModal}
                 onClose={() => setShowAddressModal(false)}
@@ -234,6 +245,26 @@ export default function OrderEditor() {
                 }}
                 addresses={addressList}
             />
-        </div >
+
+            {/* Account Modal */}
+            <AccountSelectionModal
+                show={showAccountModal}
+                onClose={() => setShowAccountModal(false)}
+                onSelect={(account) => {
+                    if (!tempOrder) return;
+
+                    // Pick the first location if multiple exist
+                    const selectedLocation = account.locations?.[0];
+                    if (selectedLocation) {
+                        console.log(selectedLocation)
+                        const updated = { ...tempOrder, accountlocid: selectedLocation.accountid };
+                        setTempOrder(updated);
+                    }
+
+                    setShowAccountModal(false);
+                }}
+                accounts={accountList}
+            />
+        </div>
     );
 }
