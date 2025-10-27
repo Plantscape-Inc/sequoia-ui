@@ -7,10 +7,11 @@ import {
     TableHeadCell,
     TableBody,
 } from "flowbite-react";
-import { Order, OrderLine, Address, Account } from "../../../types/pslive.type";
+import { Order, OrderLine, Address, Account, type Technician } from "../../../types/pslive.type";
 import OrderLineDisplay from "./OrderLine";
 import AddressSelectionModal from "../Address/AddressSelectionModal";
 import AccountSelectionModal from "../Accounts/PsLiveAccountSelectionModal";
+import TechnicianModal from "../Technicians/TechniciansSelectModal";
 
 export default function OrderEditor() {
     const API_URL = import.meta.env.VITE_PSLIVE_URL;
@@ -27,6 +28,9 @@ export default function OrderEditor() {
     // Account modal state
     const [showAccountModal, setShowAccountModal] = useState<boolean>(false);
     const [accountList, setAccountList] = useState<Account[]>([]);
+
+    const [showTechModal, setShowTechModal] = useState(false);
+
 
     // Address modal state
     const [showAddressModal, setShowAddressModal] = useState(false);
@@ -193,6 +197,15 @@ export default function OrderEditor() {
                                 {tempOrder.accountlocid || "Select Account"}
                             </Button>
                         </div>
+                        <div className="flex-1">
+                            <Label>Technician</Label>
+                            <Button
+                                size="sm"
+                                onClick={() => setShowTechModal(true)}
+                            >
+                                {tempOrder?.technician || "Select Technician"}
+                            </Button>
+                        </div>
                     </div>
 
                     {/* Update Order */}
@@ -251,7 +264,6 @@ export default function OrderEditor() {
                 onClose={() => setShowAccountModal(false)}
                 onSelect={(account) => {
                     if (!tempOrder) return;
-                    console.log(account)
 
                     const updated = { ...tempOrder, accountlocid: account.accountid };
                     setTempOrder(updated);
@@ -259,6 +271,17 @@ export default function OrderEditor() {
                     setShowAccountModal(false);
                 }}
                 accounts={accountList}
+            />
+
+            <TechnicianModal
+                show={showTechModal}
+                onClose={() => setShowTechModal(false)}
+                onSelect={(tech: Technician) => {
+                    if (!tempOrder) return;
+                    setTempOrder({ ...tempOrder, technician: tech.techid });
+                    setShowTechModal(false);
+                }}
+                apiUrl={API_URL}
             />
         </div>
     );
