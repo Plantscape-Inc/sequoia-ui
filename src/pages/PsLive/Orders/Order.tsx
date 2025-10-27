@@ -210,7 +210,6 @@ export default function OrderEditor() {
                     {/* Order Lines Table */}
                     <Table hoverable className="mt-6">
                         <TableHead>
-                            <TableHeadCell>ID</TableHeadCell>
                             <TableHeadCell></TableHeadCell>
                             <TableHeadCell></TableHeadCell>
                             <TableHeadCell>Order ID</TableHeadCell>
@@ -252,14 +251,10 @@ export default function OrderEditor() {
                 onClose={() => setShowAccountModal(false)}
                 onSelect={(account) => {
                     if (!tempOrder) return;
+                    console.log(account)
 
-                    // Pick the first location if multiple exist
-                    const selectedLocation = account.locations?.[0];
-                    if (selectedLocation) {
-                        console.log(selectedLocation)
-                        const updated = { ...tempOrder, accountlocid: selectedLocation.accountid };
-                        setTempOrder(updated);
-                    }
+                    const updated = { ...tempOrder, accountlocid: account.accountid };
+                    setTempOrder(updated);
 
                     setShowAccountModal(false);
                 }}

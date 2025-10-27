@@ -16,6 +16,7 @@ import {
     Select,
 } from "flowbite-react";
 import { ScheduleLine, Technician, type DaysOfWeek, type Order } from "../../../types/pslive.type";
+import TechnicianModal from "../Technicians/TechniciansSelectModal";
 
 
 const dayOrder: Record<string, number> = {
@@ -38,7 +39,7 @@ export default function ScheduleEditor() {
 
     // Technician Modal
     const [showTechModal, setShowTechModal] = useState(false);
-    const [technicians, setTechnicians] = useState<Technician[]>([]);
+    // const [technicians, setTechnicians] = useState<Technician[]>([]);
     const [selectedLineId, setSelectedLineId] = useState<number | null>(null);
 
     // Order Modal
@@ -81,18 +82,6 @@ export default function ScheduleEditor() {
             alert(`Error fetching schedule: ${JSON.stringify(err)}`);
         } finally {
             setLoading(false);
-        }
-    }
-
-    async function fetchTechnicians() {
-        try {
-            const response = await fetch(`${API_URL}/technicians`);
-            if (!response.ok) throw new Error("Failed to fetch technicians");
-            const data: Technician[] = await response.json();
-            setTechnicians(data);
-        } catch (err) {
-            console.error(err);
-            alert("Error fetching technicians");
         }
     }
 
@@ -175,7 +164,6 @@ export default function ScheduleEditor() {
     const openTechModal = (lineId: number) => {
         setSelectedLineId(lineId);
         setShowTechModal(true);
-        fetchTechnicians();
     };
 
     const selectTechnician = (tech: Technician) => {
@@ -272,7 +260,6 @@ export default function ScheduleEditor() {
                             type="button"
                             onClick={() => {
                                 setShowTechModal(true);
-                                fetchTechnicians();
                             }}
                         >
                             Select Technician
@@ -381,39 +368,12 @@ export default function ScheduleEditor() {
                 </div>
             )}
 
-            {/* Technician Selection Modal */}
-            <Modal show={showTechModal} size="4xl" onClose={() => setShowTechModal(false)}>
-                <ModalHeader>Select Technician</ModalHeader>
-                <ModalBody>
-                    <Table hoverable>
-                        <TableHead>
-                            <TableHeadCell>First Name</TableHeadCell>
-                            <TableHeadCell>Last Name</TableHeadCell>
-                            <TableHeadCell>Tech ID</TableHeadCell>
-                            <TableHeadCell>Select</TableHeadCell>
-                        </TableHead>
-                        <TableBody>
-                            {technicians.map((tech) => (
-                                <tr key={tech.id}>
-                                    <TableCell>{tech.firstname}</TableCell>
-                                    <TableCell>{tech.lastname}</TableCell>
-                                    <TableCell>{tech.techid}</TableCell>
-                                    <TableCell>
-                                        <Button size="xs" onClick={() => selectTechnician(tech)}>
-                                            Choose
-                                        </Button>
-                                    </TableCell>
-                                </tr>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </ModalBody>
-                <ModalFooter>
-                    <Button color="gray" onClick={() => setShowTechModal(false)}>
-                        Cancel
-                    </Button>
-                </ModalFooter>
-            </Modal>
+            <TechnicianModal
+                show={showTechModal}
+                onClose={() => setShowTechModal(false)}
+                onSelect={selectTechnician}
+                apiUrl={API_URL}
+            />
 
             {/* Order Selection Modal */}
             <Modal show={showOrderModal} size="4xl" onClose={() => setShowOrderModal(false)}>

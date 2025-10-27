@@ -83,7 +83,6 @@ export default function AccountSelectionModal({
         return () => clearTimeout(timer);
     }, [searchTerm]);
 
-    // Handle filtering (worker or FITL)
     useEffect(() => {
         if (!debouncedSearchTerm.trim()) {
             setFilteredAccounts(accounts);
@@ -92,15 +91,17 @@ export default function AccountSelectionModal({
         }
 
         setIsSearching(true);
+        console.log("here")
+        console.log(debouncedSearchTerm)
 
-        // FITL filter
         if (debouncedSearchTerm.startsWith("/f")) {
             import("fitl-js").then(({ fitlFilter }) => {
                 fitlFilter(
                     debouncedSearchTerm.substring(2),
                     accounts,
                     { tableFormat: "JSARRAY" }
-                ).then((results) => {
+                ).then((results: Account[]) => {
+                    // results = results.sort((a, b) => a.accountid.localeCompare(b.accountid));
                     setFilteredAccounts(results);
                     setIsSearching(false);
                 }).catch((err) => {
@@ -160,32 +161,38 @@ export default function AccountSelectionModal({
             </ModalHeader>
 
             <ModalBody>
-                <Table hoverable>
-                    <TableHead>
-                        <TableHeadCell>Account ID</TableHeadCell>
-                        <TableHeadCell>Date</TableHeadCell>
-                        <TableHeadCell>Notes</TableHeadCell>
-                        <TableHeadCell>Chemical Info</TableHeadCell>
-                        <TableHeadCell>Water Info</TableHeadCell>
-                        <TableHeadCell>Select</TableHeadCell>
-                    </TableHead>
-                    <TableBody>
-                        {filteredAccounts.map((acct) => (
-                            <tr key={acct.accountid}>
-                                <TableCell>{acct.accountid}</TableCell>
-                                <TableCell>{acct.date}</TableCell>
-                                <TableCell>{acct.miscnotes || "-"}</TableCell>
-                                <TableCell>{acct.chemicalinfo || "-"}</TableCell>
-                                <TableCell>{acct.waterinfo || "-"}</TableCell>
-                                <TableCell>
-                                    <Button size="xs" onClick={() => onSelect(acct)}>
-                                        Choose
-                                    </Button>
-                                </TableCell>
-                            </tr>
-                        ))}
-                    </TableBody>
-                </Table>
+                {filteredAccounts.length > 0 && (
+                    <Table hoverable>
+                        <TableHead>
+                            <TableHeadCell>Account ID</TableHeadCell>
+                            <TableHeadCell>Date</TableHeadCell>
+                            {/* <TableHeadCell>Notes</TableHeadCell> */}
+                            {/* <TableHeadCell>Chemical Info</TableHeadCell> */}
+                            {/* <TableHeadCell>Water Info</TableHeadCell> */}
+                            <TableHeadCell>Select</TableHeadCell>
+                        </TableHead>
+                        <TableBody>
+                            {filteredAccounts.sort((a, b) => a.accountid.localeCompare(b.accountid)).map((acct) => (
+                                <tr key={acct.accountid}>
+                                    <TableCell>{acct.accountid}</TableCell>
+                                    <TableCell>{acct.date}</TableCell>
+                                    {/* <TableCell>{acct.miscnotes || "-"}</TableCell> */}
+                                    {/* <TableCell>{acct.chemicalinfo || "-"}</TableCell> */}
+                                    {/* <TableCell>{acct.waterinfo || "-"}</TableCell> */}
+                                    <TableCell>
+                                        <Button size="xs" onClick={() => onSelect(acct)}>
+                                            Choose
+                                        </Button>
+                                    </TableCell>
+                                </tr>
+                            ))}
+                        </TableBody>
+                    </Table>
+                )}
+
+                {filteredAccounts.length < 1 && (
+                    <Spinner></Spinner>
+                )}
 
                 {filteredAccounts.length === 0 && debouncedSearchTerm.length > 0 && !isSearching && (
                     <div className="text-center py-8 text-gray-500 dark:text-gray-400">

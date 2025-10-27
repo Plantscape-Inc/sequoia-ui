@@ -129,7 +129,6 @@ export default function OrderLine({ line }: EditableOrderLineRowProps) {
     return (
         <>
             <TableRow className="bg-white dark:bg-gray-800">
-                <TableCell>{localLine.id}</TableCell>
                 <TableCell>
                     {localLine !== line && (
                         <div className="flex justify-center">

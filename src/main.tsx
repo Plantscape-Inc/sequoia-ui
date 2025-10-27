@@ -21,7 +21,7 @@ import PsLiveProducts from "./pages/PsLive/Products/Products.tsx";
 import PsLiveHome from "./pages/PsLive/PsLiveHome.tsx";
 import PsLiveAccounts from "./pages/PsLive/Accounts/PsLiveAccounts.tsx";
 import PsLiveAccount from "./pages/PsLive/Accounts/PsLiveAccount.tsx";
-import PsLiveTechnicians from "./pages/PsLive/Technicians.tsx";
+import PsLiveTechnicians from "./pages/PsLive/Technicians/Technicians.tsx";
 import PsLiveSchedule from "./pages/PsLive/Schedule/Schedule.tsx";
 // import ProductAnalysis from "./pages/ProductAnalysis/CSICategoryAnalysis.tsx";
 

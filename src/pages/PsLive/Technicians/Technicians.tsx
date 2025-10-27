@@ -17,7 +17,7 @@ import {
     Alert,
 } from "flowbite-react";
 
-import { Technician } from "../.././types/pslive.type"
+import { Technician } from "../../../types/pslive.type"
 
 export default function PsLiveTechnicians() {
     const API_URL = import.meta.env.VITE_PSLIVE_URL;
