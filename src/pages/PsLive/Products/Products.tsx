@@ -16,6 +16,7 @@ import {
     TextInput,
     Alert,
 } from "flowbite-react";
+import { fitlFilter } from "fitl-js";
 
 export interface Product {
     id: number;
@@ -30,6 +31,9 @@ export default function Products() {
 
     const [loading, setLoading] = useState(false);
     const [productsData, setProductsData] = useState<Product[] | null>(null);
+    const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+    const [searchTerm, setSearchTerm] = useState("");
+
     const [showModal, setShowModal] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -53,9 +57,51 @@ export default function Products() {
         setLoading(true);
         fetch(`${API_URL}/products`)
             .then((res) => res.json())
-            .then(setProductsData)
+            .then((data) => {
+                setProductsData(data);
+                setFilteredProducts(data);
+            })
             .finally(() => setLoading(false));
     }, [productsData, API_URL]);
+
+    // Filter products
+    useEffect(() => {
+        if (!productsData) return;
+
+        if (!searchTerm.trim()) {
+            setFilteredProducts(productsData);
+            return;
+        }
+
+        const filterProducts = async () => {
+            if (searchTerm.startsWith("/f")) {
+                try {
+                    const result = await fitlFilter(
+                        searchTerm.substring(2),
+                        productsData,
+                        { tableFormat: "JSARRAY" }
+                    );
+                    setFilteredProducts(result);
+                } catch (err) {
+                    console.error(err);
+                    setFilteredProducts(productsData);
+                }
+            } else {
+                const term = searchTerm.toLowerCase();
+                setFilteredProducts(
+                    productsData.filter(
+                        (p) =>
+                            p.productcode.toLowerCase().includes(term) ||
+                            p.name.toLowerCase().includes(term) ||
+                            p.id.toString().includes(term) ||
+                            p.price.toString().includes(term)
+                    )
+                );
+            }
+        };
+
+        filterProducts();
+    }, [searchTerm, productsData]);
 
     // Handle form input changes
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -158,11 +204,21 @@ export default function Products() {
     };
 
     return (
-        <div>
-            <div className="flex items-center justify-between mb-6">
+        <div className="max-w-[1000px] mx-auto">
+            <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
                 <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-200">
                     Products
                 </h1>
+                <TextInput
+                    type="text"
+                    placeholder="Filter products"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full md:w-1/3"
+                />
+                <span className="font-bold dark:text-gray-200">
+                    {searchTerm ? filteredProducts.length : productsData?.length} Results
+                </span>
                 <Button onClick={handleOpenCreateModal} color="blue">
                     Create Product
                 </Button>
@@ -174,8 +230,8 @@ export default function Products() {
                 </div>
             )}
 
-            {!loading && productsData && (
-                <Table hoverable>
+            {!loading && filteredProducts && (
+                <Table hoverable className="mx-auto min-w-[700px]">
                     <TableHead>
                         <TableHeadCell>ID</TableHeadCell>
                         <TableHeadCell>Product Code</TableHeadCell>
@@ -184,7 +240,7 @@ export default function Products() {
                         <TableHeadCell>Price</TableHeadCell>
                     </TableHead>
                     <TableBody className="divide-y">
-                        {productsData.map((product) => (
+                        {filteredProducts.map((product) => (
                             <TableRow
                                 key={product.id}
                                 className="cursor-pointer bg-white hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700"
@@ -214,11 +270,11 @@ export default function Products() {
                             <Label htmlFor="productid">Product Code</Label>
                             <TextInput
                                 id="productid"
-                                name="productid"
+                                name="productcode"
                                 value={formData?.productcode || ""}
                                 onChange={handleInputChange}
                                 required
-                                placeholder="Enter product Code"
+                                placeholder="Enter product code"
                             />
                         </div>
                         <div>

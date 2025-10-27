@@ -8,10 +8,12 @@ import {
     TableHeadCell,
     TableRow,
     Button,
+    TextInput,
 } from "flowbite-react";
 import { Order } from "../../../types/pslive.type";
 import { useNavigate } from "react-router-dom";
 import CreateOrderModal from "./OrderCreateNewModal";
+import { fitlFilter } from "fitl-js";
 
 export default function Orders() {
     const API_URL = import.meta.env.VITE_PSLIVE_URL;
@@ -19,9 +21,13 @@ export default function Orders() {
 
     const [loading, setLoading] = useState(false);
     const [ordersData, setOrdersData] = useState<Order[] | null>(null);
-
+    const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+    const [searchTerm, setSearchTerm] = useState("");
     const [showModal, setShowModal] = useState(false);
 
+    const tableCellClass = "max-w-[120px] truncate text-center";
+
+    // Fetch orders
     useEffect(() => {
         if (ordersData) return;
         setLoading(true);
@@ -30,6 +36,45 @@ export default function Orders() {
             .then(setOrdersData)
             .finally(() => setLoading(false));
     }, [ordersData, API_URL]);
+
+    // Filter orders
+    useEffect(() => {
+        if (!ordersData) return;
+
+        if (!searchTerm.trim()) {
+            setFilteredOrders(ordersData);
+            return;
+        }
+
+        const filterOrders = async () => {
+            if (searchTerm.startsWith("/f")) {
+                try {
+                    const result = await fitlFilter(
+                        searchTerm.substring(2),
+                        ordersData,
+                        { tableFormat: "JSARRAY" }
+                    );
+                    setFilteredOrders(result);
+                } catch (err) {
+                    console.error(err);
+                    setFilteredOrders(ordersData);
+                }
+            } else {
+                const term = searchTerm.toLowerCase();
+                setFilteredOrders(
+                    ordersData.filter(o =>
+                        o.orderid.toString().includes(term) ||
+                        o.accountlocid.toLowerCase().includes(term) ||
+                        o.contracttype.toLowerCase().includes(term) ||
+                        o.salesrep.toLowerCase().includes(term) ||
+                        o.technician.toLowerCase().includes(term)
+                    )
+                );
+            }
+        };
+
+        filterOrders();
+    }, [searchTerm, ordersData]);
 
     const handleDeleteOrder = async (orderid: string | number) => {
         const confirmed = window.confirm("Are you sure you want to delete this order?");
@@ -50,21 +95,32 @@ export default function Orders() {
     };
 
     return (
-        <div>
-            <h1 className="relative text-center text-4xl leading-[125%] font-bold text-gray-900 dark:text-gray-200">
+        <div className="max-w-[1000px] mx-auto">
+            <h1 className="text-4xl font-bold text-center text-gray-900 dark:text-gray-200 mb-6">
                 Orders
             </h1>
 
-            <div className="mt-4 flex justify-center">
-                <Button onClick={() => setShowModal(true)}>Create New Order</Button>
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+                <TextInput
+                    type="text"
+                    placeholder="Filter orders"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full md:w-1/3"
+                />
+                <span className="font-bold dark:text-gray-200">
+                    {searchTerm ? filteredOrders.length : ordersData?.length} Results
+                </span>
+                <Button onClick={() => setShowModal(true)} color="blue">
+                    Create New Order
+                </Button>
             </div>
 
             <CreateOrderModal
                 show={showModal}
                 onClose={() => setShowModal(false)}
                 onCreate={(newOrder: Order) => {
-                    console.log(newOrder)
-                    setOrdersData(prev => prev ? [newOrder, ...prev] : [newOrder])
+                    setOrdersData(prev => prev ? [newOrder, ...prev] : [newOrder]);
                 }}
                 apiUrl={API_URL}
             />
@@ -75,9 +131,9 @@ export default function Orders() {
                 </div>
             )}
 
-            {!loading && ordersData && (
-                <div className="mt-6">
-                    <Table hoverable>
+            {!loading && filteredOrders.length > 0 && (
+                <div className="mt-6 overflow-x-auto">
+                    <Table hoverable className="mx-auto min-w-[700px]">
                         <TableHead>
                             <TableHeadCell>Options</TableHeadCell>
                             <TableHeadCell>Order ID</TableHeadCell>
@@ -88,13 +144,13 @@ export default function Orders() {
                             <TableHeadCell>Technician</TableHeadCell>
                         </TableHead>
                         <TableBody className="divide-y">
-                            {ordersData.map(order => (
+                            {filteredOrders.map(order => (
                                 <TableRow
                                     key={order.orderid}
-                                    className="bg-white dark:bg-gray-800 cursor-pointer"
+                                    className="bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                                     onClick={() => navigate(`/psliveorder?orderid=${order.orderid}`)}
                                 >
-                                    <TableCell>
+                                    <TableCell className={tableCellClass}>
                                         <Button
                                             color="failure"
                                             size="sm"
@@ -106,14 +162,14 @@ export default function Orders() {
                                             Delete
                                         </Button>
                                     </TableCell>
-                                    <TableCell>{order.orderid}</TableCell>
-                                    <TableCell>{order.accountlocid}</TableCell>
-                                    <TableCell>{order.contracttype}</TableCell>
-                                    <TableCell>
+                                    <TableCell className={tableCellClass}>{order.orderid}</TableCell>
+                                    <TableCell className={tableCellClass}>{order.accountlocid}</TableCell>
+                                    <TableCell className={tableCellClass}>{order.contracttype}</TableCell>
+                                    <TableCell className={tableCellClass}>
                                         {order.entrydate ? new Date(order.entrydate).toLocaleDateString() : "-"}
                                     </TableCell>
-                                    <TableCell>{order.salesrep}</TableCell>
-                                    <TableCell>{order.technician}</TableCell>
+                                    <TableCell className={tableCellClass}>{order.salesrep}</TableCell>
+                                    <TableCell className={tableCellClass}>{order.technician}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

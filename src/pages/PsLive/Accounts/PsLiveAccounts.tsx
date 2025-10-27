@@ -17,6 +17,7 @@ import {
 } from "flowbite-react";
 import { Account, Address } from "../../../types/pslive.type";
 import { useNavigate } from "react-router-dom";
+import { fitlFilter } from "fitl-js";
 
 export default function Accounts() {
     const API_URL = import.meta.env.VITE_PSLIVE_URL;
@@ -24,6 +25,8 @@ export default function Accounts() {
 
     const [loading, setLoading] = useState(false);
     const [accountsData, setAccountsData] = useState<Account[] | null>(null);
+    const [filteredAccounts, setFilteredAccounts] = useState<Account[]>([]);
+    const [searchTerm, setSearchTerm] = useState("");
 
     // New state for modal visibility & form data
     const [showModal, setShowModal] = useState(false);
@@ -45,14 +48,57 @@ export default function Accounts() {
     const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
     const [selectedBillToAddress, setSelectedBillToAddress] = useState<Address | null>(null);
 
+    // Fetch accounts
     useEffect(() => {
         if (accountsData) return;
         setLoading(true);
         fetch(`${API_URL}/accounts`)
             .then((data) => data.json())
-            .then(setAccountsData)
+            .then((accounts) => {
+                setAccountsData(accounts);
+                setFilteredAccounts(accounts);
+            })
             .finally(() => setLoading(false));
     }, []);
+
+    // Filter accounts whenever searchTerm or accountsData changes
+    useEffect(() => {
+        if (!accountsData) return;
+
+        if (!searchTerm.trim()) {
+            setFilteredAccounts(accountsData);
+            return;
+        }
+
+        const filterAccounts = async () => {
+            if (searchTerm.startsWith("/f")) {
+                try {
+                    const result = await fitlFilter(
+                        searchTerm.substring(2),
+                        accountsData,
+                        { tableFormat: "JSARRAY" }
+                    );
+                    setFilteredAccounts(result);
+                } catch (err) {
+                    console.error(err);
+                    setFilteredAccounts(accountsData);
+                }
+            } else {
+                const term = searchTerm.toLowerCase();
+                setFilteredAccounts(
+                    accountsData.filter(
+                        (acc) =>
+                            acc.accountid.toLowerCase().includes(term) ||
+                            acc.locations.some((loc) =>
+                                loc.location.toLowerCase().includes(term)
+                            )
+                    )
+                );
+            }
+        };
+
+        filterAccounts();
+    }, [searchTerm, accountsData]);
 
     const handleInputChange = (field: keyof Account, value: string) => {
         setNewAccount((prev) => ({
@@ -89,6 +135,10 @@ export default function Accounts() {
             if (!res.ok) throw new Error(data.message || "Failed to create account");
 
             setAccountsData((prev) =>
+                prev ? [data, ...prev] : [data]
+            );
+
+            setFilteredAccounts((prev) =>
                 prev ? [data, ...prev] : [data]
             );
 
@@ -130,6 +180,9 @@ export default function Accounts() {
             setAccountsData((prev) =>
                 prev ? prev.filter((account) => account.accountid !== accountid) : null
             );
+
+            setFilteredAccounts((prev) =>
+                prev ? prev.filter((account) => account.accountid !== accountid) : []);
         } catch (err) {
             console.error(err);
             alert("An error occurred while deleting the account.");
@@ -140,12 +193,22 @@ export default function Accounts() {
     };
 
     return (
-        <div>
-            <h1 className="relative text-center text-4xl leading-[125%] font-bold text-gray-900 dark:text-gray-200">
+        <div className="max-w-[1000px] mx-auto">
+            <h1 className="text-4xl font-bold text-center text-gray-900 dark:text-gray-200 mb-6">
                 Account Sheets
             </h1>
 
-            <div className="mt-4 flex justify-center">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
+                <TextInput
+                    type="text"
+                    placeholder="Filter accounts"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full md:w-1/3"
+                />
+                <span className="font-bold dark:text-gray-200">
+                    {searchTerm ? filteredAccounts.length : accountsData?.length} Results
+                </span>
                 <Button onClick={() => setShowModal(true)}>Add New Account</Button>
             </div>
 
@@ -261,17 +324,12 @@ export default function Accounts() {
                                             size="xs"
                                             onClick={() => {
                                                 if (!addressFieldTarget) return;
-
-                                                // Update newAccount with address ID
                                                 handleInputChange(addressFieldTarget, String(addr.id));
-
-                                                // Update display state
                                                 if (addressFieldTarget === "address") {
                                                     setSelectedAddress(addr);
                                                 } else if (addressFieldTarget === "billtoaddress") {
                                                     setSelectedBillToAddress(addr);
                                                 }
-
                                                 setShowAddressModal(false);
                                                 setAddressFieldTarget(null);
                                             }}
@@ -297,9 +355,9 @@ export default function Accounts() {
                 </div>
             )}
 
-            {!loading && accountsData && (
-                <div className="mt-6">
-                    <Table hoverable>
+            {!loading && filteredAccounts.length > 0 && (
+                <div className="mt-6 overflow-x-auto">
+                    <Table hoverable className="mx-auto min-w-[700px]">
                         <TableHead>
                             <TableHeadCell>Options</TableHeadCell>
                             <TableHeadCell>Account ID</TableHeadCell>
@@ -307,10 +365,10 @@ export default function Accounts() {
                             <TableHeadCell>Locations</TableHeadCell>
                         </TableHead>
                         <TableBody className="divide-y">
-                            {accountsData.map((account) => (
+                            {filteredAccounts.map((account) => (
                                 <TableRow
                                     key={account.accountid}
-                                    className="bg-white dark:bg-gray-800 cursor-pointer"
+                                    className="bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
                                     onClick={() =>
                                         navigate(`/psliveaccount?accountid=${account.accountid}`)
                                     }
@@ -320,14 +378,13 @@ export default function Accounts() {
                                             color="failure"
                                             size="sm"
                                             onClick={(e) => {
-                                                e.stopPropagation(); // ✅ prevent row click
+                                                e.stopPropagation();
                                                 handleDeleteAccount(account.accountid);
                                             }}
                                         >
                                             Delete
                                         </Button>
                                     </TableCell>
-
                                     <TableCell>{account.accountid}</TableCell>
                                     <TableCell>
                                         {account.date
@@ -345,7 +402,6 @@ export default function Accounts() {
                     </Table>
                 </div>
             )}
-
         </div>
     );
 }
