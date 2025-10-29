@@ -26,7 +26,6 @@ export default function InvoiceAuto() {
         body: formData,
       });
 
-
       if (!response.ok) {
         throw new Error(`Upload failed: ${response.statusText}`);
       }
@@ -49,7 +48,6 @@ export default function InvoiceAuto() {
 
       a.remove();
       window.URL.revokeObjectURL(url);
-
     } catch (err) {
       console.error(err);
     } finally {

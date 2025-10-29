@@ -2,42 +2,35 @@ import { Link } from "react-router-dom";
 import type { GoogleUserInfo } from "../types/auth.type";
 
 interface HomeProps {
-    user: GoogleUserInfo | null;
+  user: GoogleUserInfo | null;
 }
 
-const links = [
-    { label: "Ps Live Home (New Magic)", path: "/pslive" },
-];
-
+const links = [{ label: "Ps Live Home (New Magic)", path: "/pslive" }];
 
 export default function Home({ user }: HomeProps) {
-    return (
-        <div className="flex flex-col items-center p-6">
-            <div className="w-full max-w-md">
-                <h1 className="relative text-center text-4xl leading-[125%] font-bold text-gray-900 dark:text-gray-200">
-                    Welcome {user?.name}
-                </h1>
-                <h3 className="relative text-center leading-[125%] font-bold text-gray-900 dark:text-gray-200">
-                    Click the upper left menu to access available pages
-                </h3>
-                <div className="mx-auto mt-10 grid max-w-4xl grid-cols-1 gap-6 sm:grid-cols-1">
-                    {links.map((link) => (
-                        <Link
-                            to={link.path}
-                            key={link.path}
-                            className="flex h-32 items-center justify-center rounded-xl border border-gray-200 bg-white shadow-md transition-shadow duration-200 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800"
-                        >
-                            <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-200">
-                                {link.label}
-                            </h2>
-                        </Link>
-                    ))}
-                </div>
-            </div>
-
-
-
-
+  return (
+    <div className="flex flex-col items-center p-6">
+      <div className="w-full max-w-md">
+        <h1 className="relative text-center text-4xl leading-[125%] font-bold text-gray-900 dark:text-gray-200">
+          Welcome {user?.name}
+        </h1>
+        <h3 className="relative text-center leading-[125%] font-bold text-gray-900 dark:text-gray-200">
+          Click the upper left menu to access available pages
+        </h3>
+        <div className="mx-auto mt-10 grid max-w-4xl grid-cols-1 gap-6 sm:grid-cols-1">
+          {links.map((link) => (
+            <Link
+              to={link.path}
+              key={link.path}
+              className="flex h-32 items-center justify-center rounded-xl border border-gray-200 bg-white shadow-md transition-shadow duration-200 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800"
+            >
+              <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-200">
+                {link.label}
+              </h2>
+            </Link>
+          ))}
         </div>
-    );
+      </div>
+    </div>
+  );
 }

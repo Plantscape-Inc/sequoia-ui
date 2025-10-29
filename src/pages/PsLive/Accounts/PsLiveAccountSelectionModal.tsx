@@ -1,41 +1,41 @@
 import { useState, useEffect, useMemo } from "react";
 import {
-    Button,
-    Modal,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,
-    Table,
-    TableHead,
-    TableHeadCell,
-    TableBody,
-    TableCell,
-    TextInput,
-    Spinner,
+  Button,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Table,
+  TableHead,
+  TableHeadCell,
+  TableBody,
+  TableCell,
+  TextInput,
+  Spinner,
 } from "flowbite-react";
 import { Account } from "../../../types/pslive.type";
 
 interface AccountSelectionModalProps {
-    show: boolean;
-    onClose: () => void;
-    onSelect: (account: Account) => void;
-    accounts: Account[];
+  show: boolean;
+  onClose: () => void;
+  onSelect: (account: Account) => void;
+  accounts: Account[];
 }
 
 export default function AccountSelectionModal({
-    show,
-    onClose,
-    onSelect,
-    accounts,
+  show,
+  onClose,
+  onSelect,
+  accounts,
 }: AccountSelectionModalProps) {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-    const [filteredAccounts, setFilteredAccounts] = useState<Account[]>(accounts);
-    const [isSearching, setIsSearching] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [filteredAccounts, setFilteredAccounts] = useState<Account[]>(accounts);
+  const [isSearching, setIsSearching] = useState(false);
 
-    // Inline worker for filtering
-    const worker = useMemo(() => {
-        const workerCode = `
+  // Inline worker for filtering
+  const worker = useMemo(() => {
+    const workerCode = `
             self.onmessage = function(e) {
                 const { query, accounts } = e.data;
 
@@ -60,152 +60,154 @@ export default function AccountSelectionModal({
                 self.postMessage({ results });
             };
         `;
-        const blob = new Blob([workerCode], { type: "application/javascript" });
-        const url = URL.createObjectURL(blob);
-        return new Worker(url);
-    }, []);
+    const blob = new Blob([workerCode], { type: "application/javascript" });
+    const url = URL.createObjectURL(blob);
+    return new Worker(url);
+  }, []);
 
-    // Reset when modal opens
-    useEffect(() => {
-        if (show) {
-            setSearchTerm("");
-            setDebouncedSearchTerm("");
+  // Reset when modal opens
+  useEffect(() => {
+    if (show) {
+      setSearchTerm("");
+      setDebouncedSearchTerm("");
+      setFilteredAccounts(accounts);
+      setIsSearching(false);
+    }
+  }, [show, accounts]);
+
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    if (!debouncedSearchTerm.trim()) {
+      setFilteredAccounts(accounts);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    console.log("here");
+    console.log(debouncedSearchTerm);
+
+    if (debouncedSearchTerm.startsWith("/f")) {
+      import("fitl-js").then(({ fitlFilter }) => {
+        fitlFilter(debouncedSearchTerm.substring(2), accounts, {
+          tableFormat: "JSARRAY",
+        })
+          .then((results: Account[]) => {
+            // results = results.sort((a, b) => a.accountid.localeCompare(b.accountid));
+            setFilteredAccounts(results);
+            setIsSearching(false);
+          })
+          .catch((err) => {
+            console.error(err);
             setFilteredAccounts(accounts);
             setIsSearching(false);
-        }
-    }, [show, accounts]);
+          });
+      });
+      return;
+    }
 
-    // Debounce search
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearchTerm(searchTerm);
-        }, 300);
-        return () => clearTimeout(timer);
-    }, [searchTerm]);
+    // Standard search
+    worker.postMessage({
+      query: debouncedSearchTerm,
+      accounts,
+    });
 
-    useEffect(() => {
-        if (!debouncedSearchTerm.trim()) {
-            setFilteredAccounts(accounts);
-            setIsSearching(false);
-            return;
-        }
+    const handleMessage = (e: MessageEvent) => {
+      setFilteredAccounts(e.data.results);
+      setIsSearching(false);
+    };
 
-        setIsSearching(true);
-        console.log("here")
-        console.log(debouncedSearchTerm)
+    worker.addEventListener("message", handleMessage);
+    return () => {
+      worker.removeEventListener("message", handleMessage);
+    };
+  }, [debouncedSearchTerm, accounts, worker]);
 
-        if (debouncedSearchTerm.startsWith("/f")) {
-            import("fitl-js").then(({ fitlFilter }) => {
-                fitlFilter(
-                    debouncedSearchTerm.substring(2),
-                    accounts,
-                    { tableFormat: "JSARRAY" }
-                ).then((results: Account[]) => {
-                    // results = results.sort((a, b) => a.accountid.localeCompare(b.accountid));
-                    setFilteredAccounts(results);
-                    setIsSearching(false);
-                }).catch((err) => {
-                    console.error(err);
-                    setFilteredAccounts(accounts);
-                    setIsSearching(false);
-                });
-            });
-            return;
-        }
+  // Cleanup worker
+  useEffect(() => {
+    return () => {
+      worker.terminate();
+    };
+  }, [worker]);
 
-        // Standard search
-        worker.postMessage({
-            query: debouncedSearchTerm,
-            accounts,
-        });
+  return (
+    <Modal show={show} size="5xl" onClose={onClose}>
+      <ModalHeader>
+        <div className="flex w-full items-center justify-between gap-4">
+          <span>Select Account</span>
+          <div className="flex items-center gap-2">
+            <TextInput
+              type="text"
+              placeholder="Filter accounts"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-64"
+            />
+            {isSearching && <Spinner size="sm" />}
+            {!isSearching && debouncedSearchTerm.length > 0 && (
+              <span className="text-sm whitespace-nowrap text-gray-600 dark:text-gray-400">
+                {filteredAccounts.length} results
+              </span>
+            )}
+          </div>
+        </div>
+      </ModalHeader>
 
-        const handleMessage = (e: MessageEvent) => {
-            setFilteredAccounts(e.data.results);
-            setIsSearching(false);
-        };
+      <ModalBody>
+        {filteredAccounts.length > 0 && (
+          <Table hoverable>
+            <TableHead>
+              <TableHeadCell>Account ID</TableHeadCell>
+              <TableHeadCell>Date</TableHeadCell>
+              {/* <TableHeadCell>Notes</TableHeadCell> */}
+              {/* <TableHeadCell>Chemical Info</TableHeadCell> */}
+              {/* <TableHeadCell>Water Info</TableHeadCell> */}
+              <TableHeadCell>Select</TableHeadCell>
+            </TableHead>
+            <TableBody>
+              {filteredAccounts
+                .sort((a, b) => a.accountid.localeCompare(b.accountid))
+                .map((acct) => (
+                  <tr key={acct.accountid}>
+                    <TableCell>{acct.accountid}</TableCell>
+                    <TableCell>{acct.date}</TableCell>
+                    {/* <TableCell>{acct.miscnotes || "-"}</TableCell> */}
+                    {/* <TableCell>{acct.chemicalinfo || "-"}</TableCell> */}
+                    {/* <TableCell>{acct.waterinfo || "-"}</TableCell> */}
+                    <TableCell>
+                      <Button size="xs" onClick={() => onSelect(acct)}>
+                        Choose
+                      </Button>
+                    </TableCell>
+                  </tr>
+                ))}
+            </TableBody>
+          </Table>
+        )}
 
-        worker.addEventListener("message", handleMessage);
-        return () => {
-            worker.removeEventListener("message", handleMessage);
-        };
-    }, [debouncedSearchTerm, accounts, worker]);
+        {filteredAccounts.length < 1 && <Spinner></Spinner>}
 
-    // Cleanup worker
-    useEffect(() => {
-        return () => {
-            worker.terminate();
-        };
-    }, [worker]);
+        {filteredAccounts.length === 0 &&
+          debouncedSearchTerm.length > 0 &&
+          !isSearching && (
+            <div className="py-8 text-center text-gray-500 dark:text-gray-400">
+              No accounts found matching "{debouncedSearchTerm}"
+            </div>
+          )}
+      </ModalBody>
 
-    return (
-        <Modal show={show} size="5xl" onClose={onClose}>
-            <ModalHeader>
-                <div className="flex items-center justify-between w-full gap-4">
-                    <span>Select Account</span>
-                    <div className="flex items-center gap-2">
-                        <TextInput
-                            type="text"
-                            placeholder="Filter accounts"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-64"
-                        />
-                        {isSearching && <Spinner size="sm" />}
-                        {!isSearching && debouncedSearchTerm.length > 0 && (
-                            <span className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                                {filteredAccounts.length} results
-                            </span>
-                        )}
-                    </div>
-                </div>
-            </ModalHeader>
-
-            <ModalBody>
-                {filteredAccounts.length > 0 && (
-                    <Table hoverable>
-                        <TableHead>
-                            <TableHeadCell>Account ID</TableHeadCell>
-                            <TableHeadCell>Date</TableHeadCell>
-                            {/* <TableHeadCell>Notes</TableHeadCell> */}
-                            {/* <TableHeadCell>Chemical Info</TableHeadCell> */}
-                            {/* <TableHeadCell>Water Info</TableHeadCell> */}
-                            <TableHeadCell>Select</TableHeadCell>
-                        </TableHead>
-                        <TableBody>
-                            {filteredAccounts.sort((a, b) => a.accountid.localeCompare(b.accountid)).map((acct) => (
-                                <tr key={acct.accountid}>
-                                    <TableCell>{acct.accountid}</TableCell>
-                                    <TableCell>{acct.date}</TableCell>
-                                    {/* <TableCell>{acct.miscnotes || "-"}</TableCell> */}
-                                    {/* <TableCell>{acct.chemicalinfo || "-"}</TableCell> */}
-                                    {/* <TableCell>{acct.waterinfo || "-"}</TableCell> */}
-                                    <TableCell>
-                                        <Button size="xs" onClick={() => onSelect(acct)}>
-                                            Choose
-                                        </Button>
-                                    </TableCell>
-                                </tr>
-                            ))}
-                        </TableBody>
-                    </Table>
-                )}
-
-                {filteredAccounts.length < 1 && (
-                    <Spinner></Spinner>
-                )}
-
-                {filteredAccounts.length === 0 && debouncedSearchTerm.length > 0 && !isSearching && (
-                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                        No accounts found matching "{debouncedSearchTerm}"
-                    </div>
-                )}
-            </ModalBody>
-
-            <ModalFooter>
-                <Button color="gray" onClick={onClose}>
-                    Cancel
-                </Button>
-            </ModalFooter>
-        </Modal>
-    );
+      <ModalFooter>
+        <Button color="gray" onClick={onClose}>
+          Cancel
+        </Button>
+      </ModalFooter>
+    </Modal>
+  );
 }
