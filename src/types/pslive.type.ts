@@ -30,8 +30,6 @@ export interface Order {
   billto: number;
   billing_address: Address;
   shipping_address: Address;
-  fp: number;
-  travel: number;
   total: number;
   lines: OrderLine[];
 }

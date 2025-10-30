@@ -1,4 +1,9 @@
-import { TableRow, TableCell, Button, Dropdown, DropdownItem } from "flowbite-react";
+import {
+    TableRow,
+    TableCell,
+    Button,
+
+} from "flowbite-react";
 import { useState } from "react";
 import { ArrowUp } from "lucide-react";
 import type { OrderLine } from "../../../types/pslive.type";
@@ -9,7 +14,10 @@ export default function OrderLine({ line }: { line: OrderLine }) {
     const [localLine, setLocalLine] = useState<OrderLine>(line);
     const [showProductModal, setShowProductModal] = useState(false);
 
-    const handleFieldChange = (field: keyof OrderLine, value: string | number) => {
+    const handleFieldChange = (
+        field: keyof OrderLine,
+        value: string | number,
+    ) => {
         const updated = { ...localLine, [field]: value };
         setLocalLine(updated);
     };
@@ -48,6 +56,8 @@ export default function OrderLine({ line }: { line: OrderLine }) {
             alert(`Error deleting order line: ${error}`);
         } finally {
             window.location.reload();
+            // ReactDOM.unmountComponentAtNode(ReactDOM.findDOMNode(this).parentNode);
+
         }
     };
 
@@ -68,15 +78,27 @@ export default function OrderLine({ line }: { line: OrderLine }) {
                         </div>
                     )}
                 </TableCell>
+
+
                 <TableCell>
-                    <Dropdown label="Options" inline={true} color="gray" size="sm" arrowIcon={true}>
-                        <DropdownItem onClick={() => deleteOrderline()}>Delete</DropdownItem>
-                    </Dropdown>
+
+                    <Button
+                        onClick={() => deleteOrderline()}
+                        size="sm"
+                        color="white"
+                        className="rounded border border-gray-400 bg-red-600 shadow-sm hover:border-gray-600 dark:text-white"
+                    >
+                        Delete
+                    </Button>
                 </TableCell>
 
                 <TableCell>{localLine.orderid}</TableCell>
                 <TableCell>
-                    <Button size="xs" color="light" onClick={() => setShowProductModal(true)}>
+                    <Button
+                        size="xs"
+                        color="light"
+                        onClick={() => setShowProductModal(true)}
+                    >
                         {localLine.productcode}
                     </Button>
                 </TableCell>
