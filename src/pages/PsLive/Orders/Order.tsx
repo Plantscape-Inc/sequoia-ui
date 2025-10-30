@@ -112,6 +112,8 @@ export default function OrderEditor() {
             : tempOrder.shipping_address,
       };
 
+      
+
       const res = await fetch(`${API_URL}/order/${tempOrder.orderid}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
