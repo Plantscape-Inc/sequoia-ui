@@ -11,10 +11,8 @@ import {
 import {
   type Order,
   type Account,
-  type Technician,
 } from "../../../types/pslive.type";
 import AccountSelectionModal from "../Accounts/PsLiveAccountSelectionModal";
-import TechnicianModal from "../Technicians/TechniciansSelectModal";
 
 interface CreateOrderModalProps {
   show: boolean;
@@ -46,9 +44,6 @@ export default function CreateOrderModal({
   const [showAccountModal, setShowAccountModal] = useState(false);
   const [accountList, setAccountList] = useState<Account[]>([]);
 
-  // Technician Modal
-  const [showTechModal, setShowTechModal] = useState(false);
-
   const handleInputChange = (field: keyof Order, value: string | number) => {
     setNewOrder((prev) => ({ ...prev, [field]: value }));
   };
@@ -65,10 +60,6 @@ export default function CreateOrderModal({
     }
   };
 
-  const selectTechnician = (tech: Technician) => {
-    setNewOrder((prev) => ({ ...prev, technician: tech.techid }));
-    setShowTechModal(false);
-  };
 
   const handleCreateOrder = async () => {
     setLoading(true);
@@ -234,13 +225,6 @@ export default function CreateOrderModal({
         accounts={accountList}
       />
 
-      {/* Technician Modal */}
-      <TechnicianModal
-        show={showTechModal}
-        onClose={() => setShowTechModal(false)}
-        onSelect={selectTechnician}
-        apiUrl={apiUrl}
-      />
     </>
   );
 }
